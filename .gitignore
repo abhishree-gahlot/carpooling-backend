@@ -1,0 +1,40 @@
+## Build folders
+bin/
+obj/
+
+## Visual Studio files
+.vs/
+*.user
+*.suo
+
+## Rider / VSCode
+.idea/
+.vscode/
+
+## Logs
+logs/
+*.log
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## NuGet packages
+*.nupkg
+packages/
+
+## Environment files
+.env
+appsettings.Development.json
+
+## Test results
+TestResults/
+
+## Generated files
+Generated/
+
+## Dotnet
+*.dbmdl
+*.jfm
+*.pdb
+
