@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CarpoolingSystem.Domain.Entities
+﻿namespace CarpoolingSystem.Domain.Entities
 {
     public class Vehicle
     {
