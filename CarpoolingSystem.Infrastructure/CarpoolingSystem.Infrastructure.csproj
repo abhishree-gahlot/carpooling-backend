@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CarpoolingSystem.Domain\CarpoolingSystem.Domain.csproj" />
+    <ProjectReference Include="..\CarpoolingSystem.Application\CarpoolingSystem.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
