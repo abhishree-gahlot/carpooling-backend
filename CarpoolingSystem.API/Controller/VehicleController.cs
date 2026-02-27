@@ -1,77 +1,97 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using CarpoolingSystem.Infrastructure.Data;
-using CarpoolingSystem.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using CarpoolingSystem.Application.DTOs;
+using CarpoolingSystem.Application.Services;
+using CarpoolingSystem.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace CarpoolingSystem.API.Controller
+namespace CarpoolingSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = nameof(UserRole.Driver))]
     public class VehicleController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
+        private readonly VehicleService _vehicleService;
+        private readonly IMapper _mapper;
 
-        public VehicleController(AppDbContext dbContext)
+        public VehicleController(VehicleService vehicleService, IMapper mapper)
         {
-            _dbContext = dbContext;
+            _vehicleService = vehicleService;
+            _mapper = mapper;
         }
 
         [HttpPost]
         [Route("add")]
-        public async Task<IActionResult> AddVehicle(Vehicle vehicle)
+        public async Task<IActionResult> AddVehicle([FromBody] VehicleCreateDTO vehicleDto)
         {
-            _dbContext.Add(vehicle);
-            await _dbContext.SaveChangesAsync();
-            return Ok(vehicle);
+            try
+            {
+                var userId = Guid.Parse(User.Identity!.Name!);
+                var roleClaim = User.Claims.FirstOrDefault(claim => claim.Type == "role")?.Value;
+                var userRole = Enum.Parse<UserRole>(roleClaim ?? "Passenger");
+
+                var vehicle = await _vehicleService.CreateVehicleAsync(vehicleDto, userRole, userId);
+
+                var resultDto = _mapper.Map<VehicleDTO>(vehicle);
+                return Ok(resultDto);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
         }
 
         [HttpGet]
         [Route("all")]
-        public async Task<IActionResult> GetAllVehicles()
+        public async Task<ActionResult<IEnumerable<VehicleDTO>>> GetAllVehicles()
         {
-            var vehicles = await _dbContext.Vehicles.ToListAsync();
-            return Ok(vehicles);
+            var vehicles = await _vehicleService.GetAllVehiclesAsync();
+            var vehicleDtos = _mapper.Map<IEnumerable<VehicleDTO>>(vehicles);
+            return Ok(vehicleDtos);
         }
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<IActionResult> GetVehicleById(Guid id)
+        public async Task<ActionResult<VehicleDTO>> GetVehicleById(Guid id)
         {
-            var vehicle = await _dbContext.Vehicles.FindAsync(id);
+            var vehicle = await _vehicleService.GetVehicleByIdAsync(id);
             if (vehicle == null)
             {
                 return NotFound();
             }
-            return Ok(vehicle);
+
+            return Ok(_mapper.Map<VehicleDTO>(vehicle));
         }
 
         [HttpPut]
         [Route("update/{id}")]
-        public async Task<IActionResult> UpdateVehicle(Guid id, Vehicle vehicle)
+        public async Task<IActionResult> UpdateVehicle(Guid id, [FromBody] VehicleUpdateDTO vehicleDto)
         {
-            if (id != vehicle.VehicleId)
+            try
             {
-                return BadRequest();
+                var vehicle = await _vehicleService.UpdateVehicleAsync(id, vehicleDto);
+                return Ok(_mapper.Map<VehicleDTO>(vehicle));
             }
-
-            _dbContext.Entry(vehicle).State = EntityState.Modified;
-            await _dbContext.SaveChangesAsync();
-            return Ok(vehicle);
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
         }
 
         [HttpDelete]
-        [Route("delete/{$id}")]
+        [Route("delete/{id}")]
         public async Task<IActionResult> DeleteVehicle(Guid id)
         {
-            var vehicle = await _dbContext.Vehicles.FindAsync(id);
-            if (vehicle == null)
+            try
             {
-                return NotFound();
+                await _vehicleService.DeleteVehicleAsync(id);
+                return Ok("Vehicle deleted");
             }
-
-            _dbContext.Vehicles.Remove(vehicle);
-            await _dbContext.SaveChangesAsync();
-            return Ok("Vehicle deleted");
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
         }
     }
 }
