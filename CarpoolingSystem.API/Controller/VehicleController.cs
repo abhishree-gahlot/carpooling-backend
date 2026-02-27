@@ -5,7 +5,7 @@ using CarpoolingSystem.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CarpoolingSystem.API.Controllers
+namespace CarpoolingSystem.API.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
