@@ -1,15 +1,12 @@
-﻿using CarpoolingSystem.Domain.Entities;
+using CarpoolingSystem.Domain.Entities;
 
-namespace CarpoolingSystem.Domain.Repositories
+namespace CarpoolingSystem.Application.Interfaces
 {
     public interface IVehicleRepository
     {
-        Task<Vehicle?> GetByIdAsync(Guid id);
-        Task<IEnumerable<Vehicle>> GetAllAsync();
-        Task<Vehicle?> GetByDriverIdAsync(Guid driverId);
         Task AddAsync(Vehicle vehicle);
-        void Update(Vehicle vehicle);
-        void Delete(Vehicle vehicle);
+        Task<Vehicle?> GetByIdAsync(Guid vehicleId);
+        Task UpdateAsync(Vehicle vehicle);
         Task<bool> SaveChangesAsync();
     }
 }

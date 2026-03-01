@@ -11,15 +11,19 @@ namespace CarpoolingSystem.Application.Mappings
             CreateMap<Vehicle, VehicleDTO>()
                 .ForMember(
                     destination => destination.DriverName,
-                    options => options.MapFrom(source => source.Driver.UserName)
+                    options => options.MapFrom(
+                        source => source.Driver.UserName
+                    )
                 );
 
             CreateMap<VehicleCreateDTO, Vehicle>();
 
             CreateMap<VehicleUpdateDTO, Vehicle>()
-                .ForAllMembers(options => options.Condition(
-                    (source, destination, sourceMember) => sourceMember != null
-                ));
+                .ForAllMembers(mappingOptions =>
+                    mappingOptions.Condition(
+                        (sourceObject, destinationObject, sourceMemberValue) =>
+                            sourceMemberValue != null
+                    ));
         }
     }
 }

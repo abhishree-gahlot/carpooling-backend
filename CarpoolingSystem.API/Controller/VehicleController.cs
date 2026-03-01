@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
 using CarpoolingSystem.Application.DTOs;
-using CarpoolingSystem.Application.Services;
+using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CarpoolingSystem.API.Controller
 {
@@ -12,10 +13,10 @@ namespace CarpoolingSystem.API.Controller
     [Authorize(Roles = nameof(UserRole.Driver))]
     public class VehicleController : ControllerBase
     {
-        private readonly VehicleService _vehicleService;
+        private readonly IVehicleService _vehicleService;
         private readonly IMapper _mapper;
 
-        public VehicleController(VehicleService vehicleService, IMapper mapper)
+        public VehicleController( IVehicleService vehicleService, IMapper mapper)
         {
             _vehicleService = vehicleService;
             _mapper = mapper;
@@ -27,66 +28,49 @@ namespace CarpoolingSystem.API.Controller
         {
             try
             {
-                var userId = Guid.Parse(User.Identity!.Name!);
-                var roleClaim = User.Claims.FirstOrDefault(claim => claim.Type == "role")?.Value;
-                var userRole = Enum.Parse<UserRole>(roleClaim ?? "Passenger");
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                var vehicle = await _vehicleService.CreateVehicleAsync(vehicleDto, userRole, userId);
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return Unauthorized("User ID not found in token");
+                }
 
-                var resultDto = _mapper.Map<VehicleDTO>(vehicle);
-                return Ok(resultDto);
+                Guid userId = Guid.Parse(userIdClaim);
+
+                var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value;
+
+                if (string.IsNullOrEmpty(roleClaim))
+                {
+                    return Unauthorized("User role not found in token");
+                }
+
+                var userRole = Enum.Parse<UserRole>(roleClaim);
+
+                var vehicle = await _vehicleService.CreateVehicleAsync(
+                    vehicleDto,
+                    userRole,
+                    userId
+                );
+
+                var result = _mapper.Map<VehicleDTO>(vehicle);
+
+                return Ok(result);
             }
             catch (Exception exception)
             {
                 return BadRequest(exception.Message);
             }
-        }
-
-        [HttpGet]
-        [Route("all")]
-        public async Task<ActionResult<IEnumerable<VehicleDTO>>> GetAllVehicles()
-        {
-            var vehicles = await _vehicleService.GetAllVehiclesAsync();
-            var vehicleDtos = _mapper.Map<IEnumerable<VehicleDTO>>(vehicles);
-            return Ok(vehicleDtos);
-        }
-
-        [HttpGet]
-        [Route("{id}")]
-        public async Task<ActionResult<VehicleDTO>> GetVehicleById(Guid id)
-        {
-            var vehicle = await _vehicleService.GetVehicleByIdAsync(id);
-            if (vehicle == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(_mapper.Map<VehicleDTO>(vehicle));
         }
 
         [HttpPut]
         [Route("update/{id}")]
-        public async Task<IActionResult> UpdateVehicle(Guid id, [FromBody] VehicleUpdateDTO vehicleDto)
+        public async Task<IActionResult> UpdateVehicle(Guid id,[FromBody] VehicleUpdateDTO vehicleDto)
         {
             try
             {
                 var vehicle = await _vehicleService.UpdateVehicleAsync(id, vehicleDto);
-                return Ok(_mapper.Map<VehicleDTO>(vehicle));
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(exception.Message);
-            }
-        }
 
-        [HttpDelete]
-        [Route("delete/{id}")]
-        public async Task<IActionResult> DeleteVehicle(Guid id)
-        {
-            try
-            {
-                await _vehicleService.DeleteVehicleAsync(id);
-                return Ok("Vehicle deleted");
+                return Ok(_mapper.Map<VehicleDTO>(vehicle));
             }
             catch (Exception exception)
             {

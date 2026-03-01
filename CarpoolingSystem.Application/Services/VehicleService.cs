@@ -1,102 +1,65 @@
-﻿using CarpoolingSystem.Domain.Entities;
-using CarpoolingSystem.Domain.Repositories;
-using CarpoolingSystem.Application.DTOs;
+﻿using CarpoolingSystem.Application.DTOs;
+using CarpoolingSystem.Application.Interfaces;
+using CarpoolingSystem.Domain.Entities;
 using CarpoolingSystem.Domain.Enums;
 
 namespace CarpoolingSystem.Application.Services
 {
-    public class VehicleService
+    public class VehicleService : IVehicleService
     {
         private readonly IVehicleRepository _vehicleRepository;
+
         public VehicleService(IVehicleRepository vehicleRepository)
         {
             _vehicleRepository = vehicleRepository;
         }
-        public async Task<Vehicle?> GetVehicleByIdAsync(Guid id)
+
+        public async Task<Vehicle> CreateVehicleAsync(
+            VehicleCreateDTO dto,
+            UserRole role,
+            Guid userId)
         {
-            return await _vehicleRepository.GetByIdAsync(id);
-        }
-        public async Task<Vehicle> CreateVehicleAsync(VehicleCreateDTO dto, UserRole userRole, Guid currentUserId)
-        {
-            if (userRole != UserRole.Driver || dto.DriverId != currentUserId)
-            {
-                throw new UnauthorizedAccessException("Only the assigned driver can create their vehicle.");
-            }
-
-            var existingVehicle = await _vehicleRepository.GetByDriverIdAsync(currentUserId);
-
-            if (existingVehicle != null && existingVehicle.IsActive)
-            {
-                throw new InvalidOperationException("Driver already has a vehicle which is active.");
-            }
-
-            if (dto.MaxSeats < 1 || dto.MaxSeats > 6)
-            {
-                throw new ArgumentException("MaxSeats must be between 1 and 6.");
-            }
+            if (role != UserRole.Driver)
+                throw new Exception("Only drivers can register vehicles.");
 
             var vehicle = new Vehicle
             {
-                VehicleId = Guid.NewGuid(),
                 VehicleName = dto.VehicleName,
-                DriverId = dto.DriverId,
                 MaxSeats = dto.MaxSeats,
                 LicensePlate = dto.LicensePlate,
+                DriverId = userId,
                 IsActive = true
             };
 
             await _vehicleRepository.AddAsync(vehicle);
-            var saved = await _vehicleRepository.SaveChangesAsync();
-            if (!saved)
-            {
-                throw new Exception("Failed to save vehicle.");
-            }
+            await _vehicleRepository.SaveChangesAsync();
 
             return vehicle;
         }
 
-        public async Task<Vehicle> UpdateVehicleAsync(Guid id, VehicleUpdateDTO dto)
+        public async Task<Vehicle> UpdateVehicleAsync(Guid vehicleId, VehicleUpdateDTO dto)
         {
-            var vehicle = await _vehicleRepository.GetByIdAsync(id);
+            var vehicle = await _vehicleRepository.GetByIdAsync(vehicleId);
+
             if (vehicle == null)
-            {
-                throw new KeyNotFoundException("Vehicle not found.");
-            }
+                throw new Exception("Vehicle not found");
 
-            vehicle.VehicleName = dto.VehicleName;
-            vehicle.MaxSeats = dto.MaxSeats;
-            vehicle.IsActive = dto.IsActive;
-            vehicle.LicensePlate = dto.LicensePlate;
+            if (dto.VehicleName != null)
+                vehicle.VehicleName = dto.VehicleName;
 
-            _vehicleRepository.Update(vehicle);
-            var saved = await _vehicleRepository.SaveChangesAsync();
-            if (!saved)
-            {
-                throw new Exception("Failed to update vehicle.");
-            }
+            if (dto.MaxSeats.HasValue)
+                vehicle.MaxSeats = dto.MaxSeats.Value;
+
+            if (dto.LicensePlate != null)
+                vehicle.LicensePlate = dto.LicensePlate;
+
+            if (dto.IsActive.HasValue)
+                vehicle.IsActive = dto.IsActive.Value;
+
+            await _vehicleRepository.UpdateAsync(vehicle);
+            await _vehicleRepository.SaveChangesAsync();
 
             return vehicle;
-        }
-
-        public async Task DeleteVehicleAsync(Guid id)
-        {
-            var vehicle = await _vehicleRepository.GetByIdAsync(id);
-            if (vehicle == null)
-            {
-                throw new KeyNotFoundException("Vehicle not found.");
-            }
-
-            _vehicleRepository.Delete(vehicle);
-            var saved = await _vehicleRepository.SaveChangesAsync();
-            if (!saved)
-            {
-                throw new Exception("Failed to delete vehicle.");
-            }
-        }
-
-        public async Task<IEnumerable<Vehicle>> GetAllVehiclesAsync()
-        {
-            return await _vehicleRepository.GetAllAsync();
         }
     }
 }
