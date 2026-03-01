@@ -1,8 +1,8 @@
 using System.Text;
+using CarpoolingSystem.Application.Mappings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-
 using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Application.Services;
 using CarpoolingSystem.Infrastructure.Repositories;
@@ -13,6 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -45,8 +48,19 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
+app.UseCors("AngularPolicy");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
