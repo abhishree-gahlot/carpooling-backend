@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using CarpoolingSystem.Domain.Entities;
+﻿using CarpoolingSystem.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarpoolingSystem.Infrastructure.Data
 {
