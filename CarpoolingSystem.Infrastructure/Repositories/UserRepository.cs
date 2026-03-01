@@ -27,5 +27,10 @@ namespace CarpoolingSystem.Infrastructure.Repositories
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> PinExistsAsync(string pin)
+        {
+            return await _context.Users.AnyAsync(u => u.Pin == pin);
+        }
     }
 }

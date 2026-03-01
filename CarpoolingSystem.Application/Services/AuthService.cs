@@ -42,6 +42,11 @@ namespace CarpoolingSystem.Application.Services
                 UserName = registerDto.Username,
             };
 
+            if (registerDto.Role == UserRole.Passenger)
+            {
+                user.Pin = await GenerateUniquePinAsync();
+            }
+
             await _userRepository.AddAsync(user);
         }
 
@@ -61,6 +66,20 @@ namespace CarpoolingSystem.Application.Services
             }
 
             return _tokenService.GenerateJwtToken(existingUser);
+        }
+
+        private async Task<string> GenerateUniquePinAsync()
+        {
+            var random = new Random();
+            string pin;
+
+            do
+            {
+                pin = random.Next(100000, 999999).ToString();
+            }
+            while (await _userRepository.PinExistsAsync(pin)); 
+
+            return pin;
         }
     }
 }
