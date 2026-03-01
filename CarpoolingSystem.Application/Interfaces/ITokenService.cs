@@ -6,4 +6,4 @@ namespace CarpoolingSystem.Application.Interfaces
     {
         string GenerateJwtToken(User user);
     }
-} 
+}

@@ -1,5 +1,4 @@
 using System.Text;
-using CarpoolingSystem.Application.Mappings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IVehicleService, VehicleService>();
-builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
-builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -61,6 +57,12 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AngularPolicy");
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
