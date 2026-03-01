@@ -7,5 +7,6 @@ namespace CarpoolingSystem.Application.Interfaces
     {
         Task<User?> GetByEmailAsync(string email);
         Task AddAsync(User user);
+        Task<bool> PinExistsAsync(string pin);
     }
 }
