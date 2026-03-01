@@ -21,6 +21,7 @@ namespace CarpoolingSystem.Application.DTOs
         ErrorMessage = "Username must contain only letters and spaces.")]
         public string Username { get; set; } = null!;
 
+        [Required]
         public UserRole Role { get; set; } = UserRole.Passenger;
     }
 }
