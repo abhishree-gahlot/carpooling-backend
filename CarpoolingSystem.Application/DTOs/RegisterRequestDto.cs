@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using CarpoolingSystem.Domain.Enums;
 
 namespace CarpoolingSystem.Application.DTOs
 {
@@ -20,6 +21,6 @@ namespace CarpoolingSystem.Application.DTOs
         ErrorMessage = "Username must contain only letters and spaces.")]
         public string Username { get; set; } = null!;
 
-        public string Role { get; set; } = "Passenger";
+        public UserRole Role { get; set; } = UserRole.Passenger;
     }
 }

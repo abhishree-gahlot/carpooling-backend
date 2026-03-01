@@ -7,6 +7,7 @@ using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Application.Services;
 using CarpoolingSystem.Infrastructure.Repositories;
 using CarpoolingSystem.Infrastructure.Data;
+using CarpoolingSystem.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
+builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);

@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Threading.Tasks;
 using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Domain.Entities;
 using CarpoolingSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace CarpoolingSystem.Infrastructure.Repositories
 {
-    public class UserRepository: IUserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _context;
 
@@ -28,4 +28,4 @@ namespace CarpoolingSystem.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
     }
-}   
+}
