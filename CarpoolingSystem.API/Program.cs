@@ -1,18 +1,26 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
 using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Application.Services;
-using CarpoolingSystem.Infrastructure.Repositories;
+using CarpoolingSystem.Infrastructure.Configuration;
 using CarpoolingSystem.Infrastructure.Data;
+using CarpoolingSystem.Infrastructure.Repositories;
 using CarpoolingSystem.Infrastructure.Services;
+using CarpoolingSystem.Infrastructure.ExternalServices;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
+builder.Services.Configure<ReverseGeoCodingOptions>
+    (
+        builder.Configuration.GetSection("ExternalServices:ReverseGeocoding")
+    );
+builder.Services.AddHttpClient<IReverseGeocodingService, ReverseGeoCodingService>();
+builder.Services.AddScoped<LocationService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
