@@ -2,6 +2,8 @@
 using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Domain.Entities;
 using CarpoolingSystem.Domain.Enums;
+using CarpoolingSystem.Domain.Repositories;
+
 
 namespace CarpoolingSystem.Application.Services
 {
@@ -56,7 +58,7 @@ namespace CarpoolingSystem.Application.Services
             if (dto.IsActive.HasValue)
                 vehicle.IsActive = dto.IsActive.Value;
 
-            await _vehicleRepository.UpdateAsync(vehicle);
+            _vehicleRepository.Update(vehicle);
             await _vehicleRepository.SaveChangesAsync();
 
             return vehicle;

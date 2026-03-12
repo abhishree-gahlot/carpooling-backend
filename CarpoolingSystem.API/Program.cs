@@ -1,18 +1,32 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
 using CarpoolingSystem.Application.Interfaces;
+using CarpoolingSystem.Application.Mappings;
 using CarpoolingSystem.Application.Services;
-using CarpoolingSystem.Infrastructure.Repositories;
+using CarpoolingSystem.Domain.Repositories;
 using CarpoolingSystem.Infrastructure.Data;
+using CarpoolingSystem.Infrastructure.Repositories;
 using CarpoolingSystem.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IRideSessionRepository, RideSessionRepository>();
+builder.Services.AddScoped<IRideSessionService, RideSessionService>();
+builder.Services.AddScoped<CarpoolingSystem.Domain.Repositories.IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
+//builder.Services.AddScoped<CarpoolingSystem.Application.Interfaces.IVehicleRepository, VehicleRepository>();
+
+builder.Services.AddAutoMapper(
+    typeof(CarpoolingSystem.Application.Mappings.VehicleProfile).Assembly);
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
@@ -63,11 +77,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
 
 //app.UseHttpsRedirection();
 app.UseAuthentication();
