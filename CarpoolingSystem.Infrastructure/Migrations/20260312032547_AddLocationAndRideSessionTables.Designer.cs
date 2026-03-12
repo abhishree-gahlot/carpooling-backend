@@ -4,6 +4,7 @@ using CarpoolingSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarpoolingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260312032547_AddLocationAndRideSessionTables")]
+    partial class AddLocationAndRideSessionTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,12 +111,6 @@ namespace CarpoolingSystem.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("DriverLicenseFile")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DriverLicenseFileName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailId")
                         .IsRequired()

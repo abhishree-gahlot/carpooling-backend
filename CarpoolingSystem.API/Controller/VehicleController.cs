@@ -24,6 +24,7 @@ namespace CarpoolingSystem.API.Controller
 
         [HttpPost]
         [Route("add")]
+        [Authorize]
         public async Task<IActionResult> AddVehicle([FromBody] VehicleCreateDTO vehicleDto)
         {
             try
