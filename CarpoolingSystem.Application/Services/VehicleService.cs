@@ -20,7 +20,9 @@ namespace CarpoolingSystem.Application.Services
             Guid userId)
         {
             if (role != UserRole.Driver)
+            {
                 throw new Exception("Only drivers can register vehicles.");
+            }
 
             var vehicle = new Vehicle
             {
@@ -42,19 +44,29 @@ namespace CarpoolingSystem.Application.Services
             var vehicle = await _vehicleRepository.GetByIdAsync(vehicleId);
 
             if (vehicle == null)
+            {
                 throw new Exception("Vehicle not found");
+            }
 
             if (dto.VehicleName != null)
+            {
                 vehicle.VehicleName = dto.VehicleName;
+            }
 
             if (dto.MaxSeats.HasValue)
+            {
                 vehicle.MaxSeats = dto.MaxSeats.Value;
+            }
 
             if (dto.LicensePlate != null)
+            {
                 vehicle.LicensePlate = dto.LicensePlate;
+            }
 
             if (dto.IsActive.HasValue)
+            {
                 vehicle.IsActive = dto.IsActive.Value;
+            }
 
             await _vehicleRepository.UpdateAsync(vehicle);
             await _vehicleRepository.SaveChangesAsync();
