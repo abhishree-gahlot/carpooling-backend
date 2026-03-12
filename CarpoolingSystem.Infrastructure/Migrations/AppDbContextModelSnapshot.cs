@@ -109,6 +109,12 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DriverLicenseFile")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DriverLicenseFileName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("EmailId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
