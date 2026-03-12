@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CarpoolingSystem.API/CarpoolingSystem.API.csproj" />
+  <Project Path="CarpoolingSystem.Application/CarpoolingSystem.Application.csproj" />
+  <Project Path="CarpoolingSystem.Domain/CarpoolingSystem.Domain.csproj" />
+  <Project Path="CarpoolingSystem.Infrastructure/CarpoolingSystem.Infrastructure.csproj" />
+</Solution>
