@@ -51,7 +51,7 @@ namespace CarpoolingSystem.API.Controllers
             catch (Exception exception)
             {
                 return Unauthorized(new
-                {
+                {   
                     Error = exception.Message
                 });
             }

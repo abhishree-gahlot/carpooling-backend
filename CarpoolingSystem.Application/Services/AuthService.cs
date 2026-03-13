@@ -40,6 +40,8 @@ namespace CarpoolingSystem.Application.Services
                 PasswordHash = passwordHash,
                 UserRole = registerDto.Role,
                 UserName = registerDto.Username,
+                DriverLicenseFile = registerDto.DriverLicenseFile,
+                DriverLicenseFileName = registerDto.DriverLicenseFileName
             };
 
             if (registerDto.Role == UserRole.Passenger)
@@ -52,6 +54,7 @@ namespace CarpoolingSystem.Application.Services
 
         public async Task<string> LoginAsync(LoginRequestDto loginDto)
         {
+            //var existingUser = await _userRepository.GetByEmailAsync(loginDto.Email).asNoTracking();
             var existingUser = await _userRepository.GetByEmailAsync(loginDto.Email);
 
             if (existingUser == null)

@@ -23,5 +23,8 @@ namespace CarpoolingSystem.Application.DTOs
 
         [Required]
         public UserRole Role { get; set; } = UserRole.Passenger;
+
+        public string? DriverLicenseFile { get; set; }
+        public string? DriverLicenseFileName { get; set; }
     }
 }

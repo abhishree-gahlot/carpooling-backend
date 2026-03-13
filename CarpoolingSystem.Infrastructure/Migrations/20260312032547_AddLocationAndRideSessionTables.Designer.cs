@@ -4,6 +4,7 @@ using CarpoolingSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarpoolingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260312032547_AddLocationAndRideSessionTables")]
+    partial class AddLocationAndRideSessionTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,11 +25,39 @@ namespace CarpoolingSystem.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CarpoolingSystem.Domain.Entities.RideSession", b =>
+            modelBuilder.Entity("CarpoolingSystem.Domain.Entities.Location", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Locations");
+                });
+
+            modelBuilder.Entity("CarpoolingSystem.Domain.Entities.RideSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AvailableSeats")
                         .HasColumnType("int");
@@ -38,13 +69,13 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("EndedAt")
+                    b.Property<DateTime>("EndedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("PassengerId")
+                    b.Property<Guid>("PassengerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Pickup")
@@ -80,12 +111,6 @@ namespace CarpoolingSystem.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("DriverLicenseFile")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DriverLicenseFileName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailId")
                         .IsRequired()
@@ -142,6 +167,17 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                     b.HasIndex("DriverId");
 
                     b.ToTable("Vehicles");
+                });
+
+            modelBuilder.Entity("CarpoolingSystem.Domain.Entities.Location", b =>
+                {
+                    b.HasOne("CarpoolingSystem.Domain.Entities.User", "User")
+                        .WithOne()
+                        .HasForeignKey("CarpoolingSystem.Domain.Entities.Location", "UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CarpoolingSystem.Domain.Entities.RideSession", b =>
