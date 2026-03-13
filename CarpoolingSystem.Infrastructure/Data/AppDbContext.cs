@@ -11,21 +11,10 @@ namespace CarpoolingSystem.Infrastructure.Data
         }
         public DbSet<User> Users { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
-        public DbSet<Location> Locations { get; set; }
         public DbSet<RideSession> RideSessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
-
-            // ── Location Table ────────────────────────────────────────
-            modelBuilder.Entity<Location>(e => {
-                e.HasKey(l => l.ID);
-
-                e.HasOne(l => l.User)
-                 .WithOne()
-                 .HasForeignKey<Location>(l => l.UserId)
-                 .OnDelete(DeleteBehavior.NoAction);
-            });
 
             // ── RideSession Table ─────────────────────────────────────
             modelBuilder.Entity<RideSession>(e => {

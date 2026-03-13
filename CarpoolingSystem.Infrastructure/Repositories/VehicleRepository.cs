@@ -27,14 +27,9 @@ namespace CarpoolingSystem.Infrastructure.Repositories
                 .FirstOrDefaultAsync(vehicle => vehicle.VehicleId == vehicleId);
         }
 
-        //public async Task UpdateAsync(Vehicle vehicle)
-        //{
-        //    _context.Vehicles.Update(vehicle);
-        //    await Task.CompletedTask;
-        //}
-
-        public void Update(Vehicle vehicle) {
+        public async Task UpdateAsync(Vehicle vehicle) {
             _context.Vehicles.Update(vehicle);
+            //await Task.CompletedTask;
         }
 
         public void Delete(Vehicle vehicle) {

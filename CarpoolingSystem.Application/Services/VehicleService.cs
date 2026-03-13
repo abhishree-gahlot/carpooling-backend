@@ -70,7 +70,7 @@ namespace CarpoolingSystem.Application.Services
                 vehicle.IsActive = dto.IsActive.Value;
             }
 
-            _vehicleRepository.Update(vehicle);
+            _vehicleRepository.UpdateAsync(vehicle);
             await _vehicleRepository.SaveChangesAsync();
 
             return vehicle;
