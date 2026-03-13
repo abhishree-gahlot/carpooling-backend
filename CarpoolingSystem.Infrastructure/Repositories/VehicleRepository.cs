@@ -1,4 +1,3 @@
-﻿//using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Domain.Entities;
 using CarpoolingSystem.Domain.Repositories;
 using CarpoolingSystem.Infrastructure.Data;
@@ -14,12 +13,10 @@ namespace CarpoolingSystem.Infrastructure.Repositories
         {
             _context = context;
         }
-
         public async Task AddAsync(Vehicle vehicle)
         {
             await _context.Vehicles.AddAsync(vehicle);
         }
-
         public async Task<Vehicle?> GetByIdAsync(Guid vehicleId)
         {
             return await _context.Vehicles
