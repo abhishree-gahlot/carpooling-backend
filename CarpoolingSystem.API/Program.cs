@@ -1,10 +1,11 @@
 using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Application.Services;
+using CarpoolingSystem.Domain.Repositories;
 using CarpoolingSystem.Infrastructure.Configuration;
 using CarpoolingSystem.Infrastructure.Data;
+using CarpoolingSystem.Infrastructure.ExternalServices;
 using CarpoolingSystem.Infrastructure.Repositories;
 using CarpoolingSystem.Infrastructure.Services;
-using CarpoolingSystem.Infrastructure.ExternalServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +22,8 @@ builder.Services.Configure<ReverseGeoCodingOptions>
     );
 builder.Services.AddHttpClient<IReverseGeocodingService, ReverseGeoCodingService>();
 builder.Services.AddScoped<LocationService>();
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
