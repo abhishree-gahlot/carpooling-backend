@@ -6,8 +6,6 @@ using CarpoolingSystem.Infrastructure.Data;
 using CarpoolingSystem.Infrastructure.Repositories;
 using CarpoolingSystem.Infrastructure.Services;
 using CarpoolingSystem.Infrastructure.Hubs;
-using CarpoolingSystem.Infrastructure.Configuration;
-using CarpoolingSystem.Infrastructure.ExternalServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,22 +15,23 @@ using AutoMapper;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRideSessionRepository, RideSessionRepository>();
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<IRideRequestRepository, RideRequestRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
-builder.Services.AddScoped<IRideSessionRepository, RideSessionRepository>();
 builder.Services.AddScoped<IRideSessionService, RideSessionService>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IHubService, HubService>();
-builder.Services.AddHttpClient<IReverseGeocodingService, ReverseGeoCodingService>();
+builder.Services.AddSingleton<IDriverLocationStore, DriverLocationStoreService>();
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
-
-builder.Services.Configure<ReverseGeoCodingOptions>
-    (
-        builder.Configuration.GetSection("ExternalServices:ReverseGeocoding")
-    );
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddSingleton<IDriverLocationStore, DriverLocationStoreService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
@@ -77,10 +76,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularPolicy", policy =>
@@ -93,24 +90,14 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
 app.UseCors("AngularPolicy");
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    //app.UseSwaggerUI();
-//}
-
-app.UseRouting();
-
-//app.UseMiddleware<ExceptionMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

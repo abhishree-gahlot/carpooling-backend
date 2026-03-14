@@ -39,6 +39,7 @@ namespace CarpoolingSystem.Application.Services {
             int seats = dto.AvailableSeats ?? vehicle.MaxSeats;
 
             var session = new RideSession {
+                Id = Guid.NewGuid(),
                 DriverId = driverId,
                 VehicleId = dto.VehicleId,
                 TotalSeats = vehicle.MaxSeats,
@@ -52,7 +53,7 @@ namespace CarpoolingSystem.Application.Services {
             await _rideSessionRepository.AddAsync(session);
             await _rideSessionRepository.SaveChangesAsync();
 
-            return session;
+            return await _rideSessionRepository.GetByIdAsync(session.Id)?? throw new Exception("Failed to retrieve created session.");
         }
 
         public async Task<RideSession> UpdateSessionAsync(
