@@ -9,8 +9,8 @@ namespace CarpoolingSystem.Application.DTOs {
         public string DriverName { get; set; } = string.Empty;
         public Guid VehicleId { get; set; }
         public string VehicleName { get; set; } = string.Empty;
-        public Guid? PassengerId { get; set; }
-        public string? PassengerName { get; set; }
+        //public Guid? PassengerId { get; set; }
+        //public string? PassengerName { get; set; }
         public string Pickup { get; set; } = string.Empty;
         public string Dropoff { get; set; } = string.Empty;
         public int TotalSeats { get; set; }

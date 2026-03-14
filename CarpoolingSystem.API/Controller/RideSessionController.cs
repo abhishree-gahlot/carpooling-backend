@@ -23,8 +23,6 @@ namespace CarpoolingSystem.API.Controller {
             
         }
 
-        //-----------------------------------------------------------------
-
         [HttpPost("start")]
         [Authorize(Roles = nameof(UserRole.Driver))]
         public async Task<IActionResult> StartSession(
@@ -135,10 +133,5 @@ namespace CarpoolingSystem.API.Controller {
                 return BadRequest(exception.Message);
             }
         }
-
-
-
-
-
     }
 }
