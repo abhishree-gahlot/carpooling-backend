@@ -41,7 +41,6 @@ namespace CarpoolingSystem.Application.DTOs
         public string LicensePlate { get; set; } = string.Empty;
     }
 
-
     public class VehicleUpdateDTO
     {
         [StringLength(50, MinimumLength = 2)]

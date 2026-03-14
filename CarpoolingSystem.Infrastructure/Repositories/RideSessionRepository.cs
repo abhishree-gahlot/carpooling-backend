@@ -13,7 +13,6 @@ namespace CarpoolingSystem.Infrastructure.Repositories {
         public RideSessionRepository(AppDbContext context) {
             _context = context;
         }
-        //-------------------------------------------------------------
 
         public async Task<List<Guid>> GetActiveDriverIdsAsync() {
             return await _context.RideSessions.Where(r => r.IsActive).Select(r => r.DriverId).Distinct().ToListAsync();
@@ -34,7 +33,7 @@ namespace CarpoolingSystem.Infrastructure.Repositories {
         public async Task<RideSession?> GetByIdAsync(Guid rideId) {
             return await _context.RideSessions.Include(r => r.Driver).Include(r => r.Vehicle).Include(r => r.Passenger).FirstOrDefaultAsync(r => r.Id == rideId);
         }
-        //-------------------------------------------------------------
+
         public async Task AddAsync(RideSession rideSession) {
             await _context.RideSessions.AddAsync(rideSession);
         }
