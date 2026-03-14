@@ -1,0 +1,104 @@
+﻿using CarpoolingSystem.Application.DTOs;
+using CarpoolingSystem.Application.Interfaces;
+using CarpoolingSystem.Domain.Entities;
+using CarpoolingSystem.Domain.Enums;
+using CarpoolingSystem.Domain.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace CarpoolingSystem.Application.Services {
+    public class RideRequestService : IRideRequestService {
+
+        private readonly IRideRequestRepository _rideRequestRepository;
+
+        public RideRequestService(IRideRequestRepository rideRequestRepository) {
+            _rideRequestRepository = rideRequestRepository;
+        }
+        public async Task<RideRequests> CancelRequestAsync(Guid requestId, Guid passengerId) {
+            var request = await _rideRequestRepository.GetByIdAsync(requestId);
+
+            if (request == null)
+                throw new Exception("Ride request not found.");
+
+            if (request.PassengerId != passengerId)
+                throw new Exception("You can only cancel your own requests.");
+
+            if (request.RideRequestStatus != RideRequestStatus.Pending)
+                throw new Exception("Only pending requests can be cancelled.");
+
+            request.RideRequestStatus = RideRequestStatus.Cancelled;
+            request.RespondedAt = DateTime.UtcNow;
+
+            _rideRequestRepository.Update(request);
+            await _rideRequestRepository.SaveChangesAsync();
+            return request;
+        }
+
+        public async Task<RideRequests> CreateRequestAsync(RideRequestCreateDto dto, Guid passengerId) {
+            var request = new RideRequests {
+                Id = Guid.NewGuid(),
+                PassengerId = passengerId,
+                Pickup = dto.Pickup,
+                Destination = dto.Destination,
+                RideRequestStatus = RideRequestStatus.Pending,
+                RequestedAt = DateTime.UtcNow,
+                RespondedAt = null
+            };
+
+            await _rideRequestRepository.AddAsync(request);
+            await _rideRequestRepository.SaveChangesAsync();
+            return await _rideRequestRepository.GetByIdAsync(request.Id)?? throw new Exception("Failed to retrieve created request.");
+        }
+
+        public async Task<bool> DeleteRequestAsync(Guid requestId) {
+            var request = await _rideRequestRepository.GetByIdAsync(requestId);
+
+            if (request == null)
+                throw new Exception("Ride request not found.");
+
+            _rideRequestRepository.Delete(request);
+            return await _rideRequestRepository.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<RideRequests>> GetAllRequestsAsync() {
+            return await _rideRequestRepository.GetallAsync();
+        }
+
+        public async Task<RideRequests?> GetRequestByIdAsync(Guid requestId) {
+            return await _rideRequestRepository.GetByIdAsync(requestId);
+        }
+
+        public async Task<IEnumerable<RideRequests>> GetRequestsByPassengerIdAsync(
+            Guid passengerId) {
+            return await _rideRequestRepository.GetByPassengerIdAsync(passengerId);
+        }
+
+        public async Task<RideRequests> UpdateRequestAsync(Guid requestId, RideRequestUpdateDto dto) {
+            var request = await _rideRequestRepository.GetByIdAsync(requestId);
+
+            if (request == null)
+                throw new Exception("Ride request not found.");
+
+            if (dto.Pickup != null)
+                request.Pickup = dto.Pickup;
+
+            if (dto.Destination != null)
+                request.Destination = dto.Destination;
+
+            if (dto.RideRequestStatus.HasValue) {
+                request.RideRequestStatus = dto.RideRequestStatus.Value;
+                request.RespondedAt = DateTime.UtcNow;
+            }
+
+            _rideRequestRepository.Update(request);
+            await _rideRequestRepository.SaveChangesAsync();
+
+            return request;
+        }
+
+        public async Task<IEnumerable<RideRequests>> GetPendingRequestsAsync() {
+            return await _rideRequestRepository.GetPendingRequestsAsync();
+        }
+    }
+}
