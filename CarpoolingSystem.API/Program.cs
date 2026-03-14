@@ -3,22 +3,16 @@ using CarpoolingSystem.Application.Mappings;
 using CarpoolingSystem.Application.Services;
 using CarpoolingSystem.Domain.Repositories;
 using CarpoolingSystem.Infrastructure.Data;
-using CarpoolingSystem.Infrastructure.ExternalServices;
 using CarpoolingSystem.Infrastructure.Repositories;
 using CarpoolingSystem.Infrastructure.Services;
-using CarpoolingSystem.Infrastructure.Configuration;
-using CarpoolingSystem.Infrastructure.ExternalServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AutoMapper;
-//using CarpoolingSystem.Application.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-//builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
@@ -27,25 +21,10 @@ builder.Services.AddScoped<IRideSessionService, RideSessionService>();
 builder.Services.AddScoped<CarpoolingSystem.Domain.Repositories.IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
-
-builder.Services.AddHttpClient<IReverseGeocodingService, ReverseGeoCodingService>();
-
-//builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
-//builder.Services.AddAutoMapper(typeof(VehicleProfile));
-builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
-//builder.Services.AddScoped<CarpoolingSystem.Application.Interfaces.IVehicleRepository, VehicleRepository>();
-
-//builder.Services.AddAutoMapper(
-//    typeof(CarpoolingSystem.Application.Mappings.VehicleProfile).Assembly);
-//builder.Services.AddAutoMapper(typeof(VehicleProfile).Assembly);
-builder.Services.Configure<ReverseGeoCodingOptions>
-    (
-        builder.Configuration.GetSection("ExternalServices:ReverseGeocoding")
-    );
-builder.Services.AddHttpClient<IReverseGeocodingService, ReverseGeoCodingService>();
-builder.Services.AddScoped<LocationService>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddSingleton<IDriverLocationStore, DriverLocationStoreService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
@@ -98,14 +77,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
-//app.UseMiddleware<ExceptionMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
