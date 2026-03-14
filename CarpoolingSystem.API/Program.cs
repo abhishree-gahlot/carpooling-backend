@@ -26,6 +26,8 @@ builder.Services.AddScoped<IRideSessionService, RideSessionService>();
 builder.Services.AddScoped<CarpoolingSystem.Domain.Repositories.IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<IRideRequestRepository, RideRequestRepository>();
+builder.Services.AddScoped<IRideRequestService, RideRequestService>();
 
 builder.Services.AddHttpClient<IReverseGeocodingService, ReverseGeoCodingService>();
 
