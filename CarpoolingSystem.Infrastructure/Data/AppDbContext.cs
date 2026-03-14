@@ -16,23 +16,19 @@ namespace CarpoolingSystem.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
 
-            // ── RideSession Table ─────────────────────────────────────
             modelBuilder.Entity<RideSession>(e => {
                 e.HasKey(r => r.Id);
 
-                // Driver FK → Users
                 e.HasOne(r => r.Driver)
                  .WithMany()
                  .HasForeignKey(r => r.DriverId)
                  .OnDelete(DeleteBehavior.NoAction);
 
-                // Vehicle FK → Vehicles
                 e.HasOne(r => r.Vehicle)
                  .WithMany()
                  .HasForeignKey(r => r.VehicleId)
                  .OnDelete(DeleteBehavior.NoAction);
 
-                // Passenger FK → Users (nullable)
                 e.HasOne(r => r.Passenger)
                  .WithMany()
                  .HasForeignKey(r => r.PassengerId)
