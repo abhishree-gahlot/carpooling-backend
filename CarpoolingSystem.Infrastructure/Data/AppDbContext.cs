@@ -1,4 +1,4 @@
-﻿using CarpoolingSystem.Domain.Entities;
+using CarpoolingSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarpoolingSystem.Infrastructure.Data
@@ -22,7 +22,7 @@ namespace CarpoolingSystem.Infrastructure.Data
                 e.HasKey(r => r.Id);
 
                 e.Property(r => r.Id)
-                 .ValueGeneratedOnAdd();  // ← add this line
+                 .ValueGeneratedOnAdd(); 
 
                 e.HasOne(r => r.Driver)
                  .WithMany()
@@ -43,7 +43,6 @@ namespace CarpoolingSystem.Infrastructure.Data
                 e.HasIndex(r => new { r.DriverId, r.IsActive })
                  .HasDatabaseName("IX_RideSessions_DriverActive");
             });
-
 
             modelBuilder.Entity<RideRequests>(e =>
             {
