@@ -66,5 +66,9 @@ namespace CarpoolingSystem.Application.Services
 
             return vehicle;
         }
+        public async Task<Vehicle?> GetVehicleByDriverIdAsync(Guid driverId)
+        {
+            return await _vehicleRepository.GetByDriverIdAsync(driverId);
+        }
     }
 }
