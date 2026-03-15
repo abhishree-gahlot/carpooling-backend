@@ -21,38 +21,17 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IRideSessionService, RideSessionService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
-<<<<<<< HEAD
-<<<<<<< HEAD
 builder.Services.AddScoped<IRideRequestRepository, RideRequestRepository>();
-=======
->>>>>>> 8029ea04eb93dc136660f8cbcfe3f04ebe83022f
 builder.Services.AddScoped<IRideRequestService, RideRequestService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 
 builder.Services.AddSingleton<IDriverLocationStore, DriverLocationStoreService>();
-
-<<<<<<< HEAD
-//builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
-//builder.Services.AddAutoMapper(typeof(VehicleProfile));
 builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
-//builder.Services.AddScoped<CarpoolingSystem.Application.Interfaces.IVehicleRepository, VehicleRepository>();
 
-//builder.Services.AddAutoMapper(
-//    typeof(CarpoolingSystem.Application.Mappings.VehicleProfile).Assembly);
-//builder.Services.AddAutoMapper(typeof(VehicleProfile).Assembly);
-builder.Services.Configure<ReverseGeoCodingOptions>
-    (
-        builder.Configuration.GetSection("ExternalServices:ReverseGeocoding")
-    );
-=======
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddSingleton<IDriverLocationStore, DriverLocationStoreService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
->>>>>>> 60466971477237f919b5cb3044d1976e4ddbfb1b
-=======
-builder.Services.AddAutoMapper(typeof(VehicleProfile).Assembly);
->>>>>>> 8029ea04eb93dc136660f8cbcfe3f04ebe83022f
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);

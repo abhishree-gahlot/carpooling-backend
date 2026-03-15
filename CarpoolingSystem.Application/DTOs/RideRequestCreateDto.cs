@@ -7,11 +7,9 @@ namespace CarpoolingSystem.Application.DTOs {
     public class RideRequestCreateDto {
 
         [Required]
-        [StringLength(100, MinimumLength =2)]
-        public string Pickup { get; set; } = string.Empty;
+        public LocationDto Pickup { get; set; } = new();
 
         [Required]
-        [StringLength(100, MinimumLength = 2)]
-        public string Destination {  get; set; } = string.Empty;
+        public LocationDto Destination {  get; set; } = new();
     }
 }
