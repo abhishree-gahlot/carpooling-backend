@@ -19,6 +19,5 @@ namespace CarpoolingSystem.Domain.Entities {
         public DateTime? RespondedAt { get; set; }
         public RideRequestStatus RideRequestStatus { get; set; }
             = RideRequestStatus.Pending;
-
     }
 }

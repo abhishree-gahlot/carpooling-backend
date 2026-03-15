@@ -24,13 +24,14 @@ builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
 builder.Services.AddScoped<IRideSessionService, RideSessionService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<IRideRequestRepository, RideRequestRepository>();
 builder.Services.AddScoped<IRideRequestService, RideRequestService>();
 
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IHubService, HubService>();
 
-builder.Services.AddSingleton<IDriverLocationStore, DriverLocationStoreService>();
-
+builder.Services.AddSingleton<IDriverLocationStoreService, DriverLocationStoreService>();
+builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
 builder.Services.AddSignalR();
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);

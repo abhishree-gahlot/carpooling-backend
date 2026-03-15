@@ -1,18 +1,18 @@
 ﻿using CarpoolingSystem.Application.DTOs;
 using CarpoolingSystem.Application.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using CarpoolingSystem.Domain.Repositories;
 
 namespace CarpoolingSystem.Application.Services
 {
     public class LocationService: ILocationService
     {
-        private readonly IDriverLocationStore _driverLocationStore;
+        private readonly IDriverLocationStoreService _driverLocationStore;
+        private readonly IRideSessionRepository _rideSessionRepository;
 
-        public LocationService(IDriverLocationStore driverLocationStore)
+        public LocationService(IDriverLocationStoreService driverLocationStore, IRideSessionRepository rideSessionRepository)
         {
             _driverLocationStore = driverLocationStore;
+            _rideSessionRepository = rideSessionRepository;
         }
 
         public void UpdateDriverLocation(Guid driverId, double latitude, double longitude)
@@ -20,21 +20,47 @@ namespace CarpoolingSystem.Application.Services
             _driverLocationStore.UpdateLocation(driverId, latitude, longitude);
         }
 
-        public IEnumerable<NearbyDriverDto> GetNearbyDrivers(double latitude, double longitude, double radiusMeters)
+        public async Task<IEnumerable<NearbyDriverDto>> GetNearbyDrivers(double latitude, double longitude, double radiusMeters)
         {
-            var allDrivers = _driverLocationStore.GetAllLocations();
+            var allDriverLocations = _driverLocationStore.GetAllLocations();
             var radiusKm = radiusMeters / 1000.0;
 
-            return allDrivers
+            var nearbyDriverLocations = allDriverLocations
                 .Where(driver => CalculateDistanceKm(latitude, longitude, driver.Latitude, driver.Longitude) <= radiusKm)
-                .Select(driver => new NearbyDriverDto
+                .ToList();
+
+            if(!nearbyDriverLocations.Any())
+            {
+                return Enumerable.Empty<NearbyDriverDto>();
+            }
+
+            var result = new List<NearbyDriverDto>();
+
+            foreach (var driverLocation in nearbyDriverLocations)
+            {
+                var activeSession = await _rideSessionRepository
+                    .GetActiveSessionByDriverIdAsync(driverLocation.DriverId);
+
+                if (activeSession == null || activeSession.AvailableSeats <= 0)
                 {
-                    DriverId = driver.DriverId,
-                    Latitude = driver.Latitude,
-                    Longitude = driver.Longitude,
-                    DistanceKm = Math.Round(CalculateDistanceKm(latitude, longitude, driver.Latitude, driver.Longitude), 2),
-                    LastUpdated = driver.UpdatedAt
+                    continue; 
+                }
+
+                result.Add(new NearbyDriverDto
+                {
+                    DriverId = driverLocation.DriverId,
+                    DriverName = activeSession.Driver.UserName,
+                    VehicleName = activeSession.Vehicle.VehicleName,
+                    LicensePlate = activeSession.Vehicle.LicensePlate,
+                    AvailableSeats = activeSession.AvailableSeats,
+                    Latitude = driverLocation.Latitude,
+                    Longitude = driverLocation.Longitude,
+                    DistanceKm = Math.Round(CalculateDistanceKm(latitude, longitude, driverLocation.Latitude, driverLocation.Longitude), 2),
+                    LastUpdated = driverLocation.UpdatedAt
                 });
+            }
+
+            return result;
         }
 
         private double ConvertDegreesToRadians(double degrees)

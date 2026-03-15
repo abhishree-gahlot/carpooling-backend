@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CarpoolingSystem.Infrastructure.Services
 {
-    public class DriverLocationStoreService : IDriverLocationStore
+    public class DriverLocationStoreService : IDriverLocationStoreService
     {
         private readonly ConcurrentDictionary<Guid, DriverLocationDto> _locations = new();
 

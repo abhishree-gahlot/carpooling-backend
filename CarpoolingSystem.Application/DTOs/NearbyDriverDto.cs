@@ -9,6 +9,7 @@ namespace CarpoolingSystem.Application.DTOs {
         public string DriverName { get; set; } = String.Empty;
         public string VehicleName { get; set; } = String.Empty;
         public string LicensePlate { get; set; } = String.Empty;
+        public int AvailableSeats { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public double DistanceKm { get; set; }
