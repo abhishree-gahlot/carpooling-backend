@@ -5,6 +5,7 @@ using CarpoolingSystem.Domain.Repositories;
 using CarpoolingSystem.Infrastructure.Data;
 using CarpoolingSystem.Infrastructure.Repositories;
 using CarpoolingSystem.Infrastructure.Services;
+using CarpoolingSystem.Infrastructure.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -20,39 +21,17 @@ builder.Services.AddScoped<IRideRequestRepository, RideRequestRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IRideSessionService, RideSessionService>();
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
-<<<<<<< HEAD
-<<<<<<< HEAD
-builder.Services.AddScoped<IRideRequestRepository, RideRequestRepository>();
-=======
->>>>>>> 8029ea04eb93dc136660f8cbcfe3f04ebe83022f
-builder.Services.AddScoped<IRideRequestService, RideRequestService>();
-builder.Services.AddScoped<ILocationService, LocationService>();
-
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IHubService, HubService>();
 builder.Services.AddSingleton<IDriverLocationStore, DriverLocationStoreService>();
 
-<<<<<<< HEAD
-//builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
-//builder.Services.AddAutoMapper(typeof(VehicleProfile));
 builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
-//builder.Services.AddScoped<CarpoolingSystem.Application.Interfaces.IVehicleRepository, VehicleRepository>();
-
-//builder.Services.AddAutoMapper(
-//    typeof(CarpoolingSystem.Application.Mappings.VehicleProfile).Assembly);
-//builder.Services.AddAutoMapper(typeof(VehicleProfile).Assembly);
-builder.Services.Configure<ReverseGeoCodingOptions>
-    (
-        builder.Configuration.GetSection("ExternalServices:ReverseGeocoding")
-    );
-=======
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddSingleton<IDriverLocationStore, DriverLocationStoreService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
->>>>>>> 60466971477237f919b5cb3044d1976e4ddbfb1b
-=======
-builder.Services.AddAutoMapper(typeof(VehicleProfile).Assembly);
->>>>>>> 8029ea04eb93dc136660f8cbcfe3f04ebe83022f
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
@@ -74,8 +53,25 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"],
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
-    };
-});
+    };                                    
+
+    options.Events = new JwtBearerEvents 
+    {
+        OnMessageReceived = context =>
+        {
+            var token = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(token) &&
+                path.StartsWithSegments("/hubs/ride"))
+            {
+                context.Token = token;
+            }
+            return Task.CompletedTask;
+        }
+    };                                   
+
+});                        
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -88,7 +84,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -99,8 +96,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<RideHub>("/hubs/ride");
+
 app.Run();

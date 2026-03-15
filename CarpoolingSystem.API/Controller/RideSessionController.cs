@@ -133,10 +133,5 @@ namespace CarpoolingSystem.API.Controller {
                 return BadRequest(exception.Message);
             }
         }
-
-
-
-
-
     }
 }
