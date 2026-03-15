@@ -32,15 +32,24 @@ namespace CarpoolingSystem.Application.Services {
 
             _rideRequestRepository.Update(request);
             await _rideRequestRepository.SaveChangesAsync();
+
             return request;
         }
 
-        public async Task<RideRequests> CreateRequestAsync(RideRequestCreateDto dto, Guid passengerId) {
+        public async Task<RideRequests> CreateRequestAsync(
+             RideRequestCreateDto dto, Guid passengerId) {
             var request = new RideRequests {
                 Id = Guid.NewGuid(),
                 PassengerId = passengerId,
-                Pickup = dto.Pickup,
-                Destination = dto.Destination,
+
+                PickupLatitude = dto.Pickup.Latitude,
+                PickupLongitude = dto.Pickup.Longitude,
+                PickupName = dto.Pickup.Name,
+
+                DestinationLatitude = dto.Destination.Latitude,
+                DestinationLongitude = dto.Destination.Longitude,
+                DestinationName = dto.Destination.Name,
+
                 RideRequestStatus = RideRequestStatus.Pending,
                 RequestedAt = DateTime.UtcNow,
                 RespondedAt = null
@@ -48,6 +57,7 @@ namespace CarpoolingSystem.Application.Services {
 
             await _rideRequestRepository.AddAsync(request);
             await _rideRequestRepository.SaveChangesAsync();
+
             return await _rideRequestRepository.GetByIdAsync(request.Id)?? throw new Exception("Failed to retrieve created request.");
         }
 
@@ -79,12 +89,6 @@ namespace CarpoolingSystem.Application.Services {
 
             if (request == null)
                 throw new Exception("Ride request not found.");
-
-            if (dto.Pickup != null)
-                request.Pickup = dto.Pickup;
-
-            if (dto.Destination != null)
-                request.Destination = dto.Destination;
 
             if (dto.RideRequestStatus.HasValue) {
                 request.RideRequestStatus = dto.RideRequestStatus.Value;

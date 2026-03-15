@@ -9,8 +9,12 @@ namespace CarpoolingSystem.Domain.Entities {
         public Guid Id { get; set; }
         public Guid PassengerId { get; set; }
         public User Passenger { get; set; } = null!;
-        public string Pickup { get; set; } = string.Empty;
-        public string Destination { get; set; } = string.Empty;
+        public double PickupLatitude { get; set; }
+        public double PickupLongitude { get; set; }
+        public string PickupName { get; set; } = string.Empty;
+        public double DestinationLatitude { get; set; }
+        public double DestinationLongitude { get; set; }
+        public string DestinationName { get; set; } = string.Empty;
         public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
         public DateTime? RespondedAt { get; set; }
         public RideRequestStatus RideRequestStatus { get; set; }
