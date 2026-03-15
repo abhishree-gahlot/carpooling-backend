@@ -41,7 +41,6 @@ namespace CarpoolingSystem.Application.Services
                 var activeSession = await _rideSessionRepository
                     .GetActiveSessionByDriverIdAsync(driverLocation.DriverId);
 
-                Console.WriteLine("Active session: ", activeSession);
                 if (activeSession == null || activeSession.AvailableSeats <= 0)
                 {
                     continue; 

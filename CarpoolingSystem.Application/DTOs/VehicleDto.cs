@@ -25,7 +25,6 @@ namespace CarpoolingSystem.Application.DTOs
         public string LicensePlate { get; set; } = string.Empty;
     }
 
-
     public class VehicleCreateDTO
     {
         [Required]

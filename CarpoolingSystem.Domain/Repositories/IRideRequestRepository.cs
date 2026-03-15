@@ -6,7 +6,7 @@ using System.Text;
 namespace CarpoolingSystem.Domain.Repositories {
     public interface IRideRequestRepository {
 
-        Task<RideRequests> GetByIdAsync(Guid requestId);
+        Task<RideRequests?> GetByIdAsync(Guid requestId);
         Task<IEnumerable<RideRequests>> GetallAsync();
         Task<IEnumerable<RideRequests>> GetByPassengerIdAsync(Guid passengerId);
         Task<IEnumerable<RideRequests>> GetPendingRequestsAsync(); 

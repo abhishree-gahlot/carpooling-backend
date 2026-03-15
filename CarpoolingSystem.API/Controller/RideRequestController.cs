@@ -22,11 +22,9 @@ namespace CarpoolingSystem.API.Controller {
             _mapper = mapper;
         }
 
-
         [HttpPost("create")]
         [Authorize(Roles = nameof(UserRole.Passenger))]
-        public async Task<IActionResult> CreateRequest(
-            [FromBody] RideRequestCreateDto dto) {
+        public async Task<IActionResult> CreateRequest([FromBody] RideRequestCreateDto dto) {
             try {
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userIdClaim))
