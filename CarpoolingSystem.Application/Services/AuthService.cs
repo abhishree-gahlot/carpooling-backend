@@ -1,14 +1,10 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using CarpoolingSystem.Application.DTOs;
 using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Domain.Entities;
 using CarpoolingSystem.Domain.Enums;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
+using CarpoolingSystem.Domain.Repositories;
 
 namespace CarpoolingSystem.Application.Services
 {
@@ -16,11 +12,16 @@ namespace CarpoolingSystem.Application.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
+        private readonly IVehicleRepository _vehicleRepository;
 
-        public AuthService(IUserRepository userRepository, ITokenService tokenService)
+        public AuthService(
+            IUserRepository userRepository,
+            ITokenService tokenService,
+            IVehicleRepository vehicleRepository)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
+            _vehicleRepository = vehicleRepository;
         }
 
         public async Task RegisterAsync(RegisterRequestDto registerDto)
@@ -49,12 +50,29 @@ namespace CarpoolingSystem.Application.Services
                 user.Pin = await GenerateUniquePinAsync();
             }
 
+            // Save user first
             await _userRepository.AddAsync(user);
+
+            // Create vehicle if the user is a driver
+            if (registerDto.Role == UserRole.Driver)
+            {
+                var vehicle = new Vehicle
+                {
+                    VehicleId = Guid.NewGuid(),
+                    DriverId = user.UserId,
+                    VehicleName = registerDto.VehicleName ?? "Unknown Vehicle",
+                    MaxSeats = registerDto.MaxSeats ?? 4,
+                    LicensePlate = registerDto.VehicleLicense ?? "UNKNOWN",
+                    IsActive = true
+                };
+
+                await _vehicleRepository.AddAsync(vehicle);
+                await _vehicleRepository.SaveChangesAsync();
+            }
         }
 
         public async Task<string> LoginAsync(LoginRequestDto loginDto)
         {
-            //var existingUser = await _userRepository.GetByEmailAsync(loginDto.Email).asNoTracking();
             var existingUser = await _userRepository.GetByEmailAsync(loginDto.Email);
 
             if (existingUser == null)
@@ -63,6 +81,7 @@ namespace CarpoolingSystem.Application.Services
             }
 
             var validPassword = BCrypt.Net.BCrypt.Verify(loginDto.Password, existingUser.PasswordHash);
+
             if (!validPassword)
             {
                 throw new Exception("Invalid login credentials");
@@ -80,10 +99,9 @@ namespace CarpoolingSystem.Application.Services
             {
                 pin = random.Next(100000, 999999).ToString();
             }
-            while (await _userRepository.PinExistsAsync(pin)); 
+            while (await _userRepository.PinExistsAsync(pin));
 
             return pin;
         }
     }
 }
-

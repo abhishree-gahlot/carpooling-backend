@@ -24,6 +24,12 @@ namespace CarpoolingSystem.Application.DTOs
         [Required]
         public UserRole Role { get; set; } = UserRole.Passenger;
 
+        public string? VehicleName { get; set; }
+
+        public int? MaxSeats { get; set; }
+
+        public string? VehicleLicense { get; set; }
+
         public string? DriverLicenseFile { get; set; }
         public string? DriverLicenseFileName { get; set; }
     }

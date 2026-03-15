@@ -1,40 +1,28 @@
 ﻿using AutoMapper;
 using CarpoolingSystem.Application.DTOs;
 using CarpoolingSystem.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace CarpoolingSystem.Application.Mappings {
-    public class RideSessionProfile: Profile {
-        public RideSessionProfile() {
-            CreateMap<RideSession, RideSessionDto>()
+namespace CarpoolingSystem.Application.Mappings;
 
-               .ForMember(
-                   destination => destination.RideId,
-                   options => options.MapFrom(source => source.Id))
-               .ForMember(
-                   destination => destination.DriverName,
-                   options => options.MapFrom(
-                       source => source.Driver.UserName))
-               .ForMember(
-                   destination => destination.VehicleName,
-                   options => options.MapFrom(
-                       source => source.Vehicle.VehicleName))
-               .ForMember(
-                   destination => destination.PassengerName,
-                   options => options.MapFrom(
-                       source => source.Passenger != null
-                           ? source.Passenger.UserName
-                           : null));
+public class RideSessionProfile : Profile
+{
+    public RideSessionProfile()
+    {
+        CreateMap<RideSession, RideSessionDto>()
+            .ForMember(
+                dest => dest.RideId,
+                opt => opt.MapFrom(src => src.Id))
+            .ForMember(
+                dest => dest.DriverName,
+                opt => opt.MapFrom(src => src.Driver.UserName))
+            .ForMember(
+                dest => dest.VehicleName,
+                opt => opt.MapFrom(src => src.Vehicle.VehicleName));
 
-            CreateMap<RideSessionCreateDto, RideSession>();
+        CreateMap<RideSessionCreateDto, RideSession>();
 
-            CreateMap<RideSessionUpdateDto, RideSession>()
-                .ForAllMembers(mappingOptions =>
-                    mappingOptions.Condition(
-                        (sourceObject, destinationObject, sourceMemberValue) =>
-                            sourceMemberValue != null));
-        }
-        }
+        CreateMap<RideSessionUpdateDto, RideSession>()
+            .ForAllMembers(opt =>
+                opt.Condition((src, dest, srcMember) => srcMember != null));
+    }
 }
