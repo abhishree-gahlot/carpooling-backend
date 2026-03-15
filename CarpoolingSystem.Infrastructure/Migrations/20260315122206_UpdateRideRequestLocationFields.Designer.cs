@@ -4,6 +4,7 @@ using CarpoolingSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarpoolingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260315122206_UpdateRideRequestLocationFields")]
+    partial class UpdateRideRequestLocationFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,6 +92,9 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<Guid?>("PassengerId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Pickup")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -103,6 +109,8 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PassengerId");
 
                     b.HasIndex("VehicleId");
 
@@ -203,6 +211,11 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("CarpoolingSystem.Domain.Entities.User", "Passenger")
+                        .WithMany()
+                        .HasForeignKey("PassengerId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("CarpoolingSystem.Domain.Entities.Vehicle", "Vehicle")
                         .WithMany()
                         .HasForeignKey("VehicleId")
@@ -210,6 +223,8 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Driver");
+
+                    b.Navigation("Passenger");
 
                     b.Navigation("Vehicle");
                 });

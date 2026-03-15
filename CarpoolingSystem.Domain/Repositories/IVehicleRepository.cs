@@ -5,6 +5,7 @@ namespace CarpoolingSystem.Domain.Repositories
     public interface IVehicleRepository
     {
         Task<Vehicle?> GetByIdAsync(Guid id);
+        Task<Vehicle?> GetByDriverIdAsync(Guid driverId);
         Task AddAsync(Vehicle vehicle);
         Task UpdateAsync(Vehicle vehicle);
         Task<bool> SaveChangesAsync();

@@ -34,11 +34,11 @@ namespace CarpoolingSystem.Infrastructure.Data
                  .HasForeignKey(r => r.VehicleId)
                  .OnDelete(DeleteBehavior.NoAction);
 
-                e.HasOne(r => r.Passenger)
-                 .WithMany()
-                 .HasForeignKey(r => r.PassengerId)
-                 .OnDelete(DeleteBehavior.NoAction)
-                 .IsRequired(false);
+                //e.HasOne(r => r.Passenger)
+                // .WithMany()
+                // .HasForeignKey(r => r.PassengerId)
+                // .OnDelete(DeleteBehavior.NoAction)
+                // .IsRequired(false);
 
                 e.HasIndex(r => new { r.DriverId, r.IsActive })
                  .HasDatabaseName("IX_RideSessions_DriverActive");
@@ -49,6 +49,13 @@ namespace CarpoolingSystem.Infrastructure.Data
                 e.HasKey(r => r.Id);
 
                 e.Property(r => r.Id).ValueGeneratedOnAdd();
+                e.Property(r => r.PickupLatitude).IsRequired();
+                e.Property(r => r.PickupLongitude).IsRequired();
+                e.Property(r => r.PickupName).IsRequired();
+
+                e.Property(r => r.DestinationLatitude).IsRequired();
+                e.Property(r => r.DestinationLongitude).IsRequired();
+                e.Property(r => r.DestinationName).IsRequired();
 
                 e.HasOne(r => r.Passenger)
                  .WithMany()
