@@ -4,6 +4,7 @@ using CarpoolingSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarpoolingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260315142200_FixRideSessionIdToGuid")]
+    partial class FixRideSessionIdToGuid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,26 +31,14 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("DestinationLatitude")
-                        .HasColumnType("float");
-
-                    b.Property<double>("DestinationLongitude")
-                        .HasColumnType("float");
-
-                    b.Property<string>("DestinationName")
+                    b.Property<string>("Destination")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("PassengerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("PickupLatitude")
-                        .HasColumnType("float");
-
-                    b.Property<double>("PickupLongitude")
-                        .HasColumnType("float");
-
-                    b.Property<string>("PickupName")
+                    b.Property<string>("Pickup")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

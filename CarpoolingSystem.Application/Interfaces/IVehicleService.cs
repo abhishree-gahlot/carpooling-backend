@@ -8,5 +8,6 @@ namespace CarpoolingSystem.Application.Interfaces
     {
         Task<Vehicle> CreateVehicleAsync(VehicleCreateDTO dto, UserRole role, Guid userId);
         Task<Vehicle> UpdateVehicleAsync(Guid vehicleId, VehicleUpdateDTO dto);
+        Task<Vehicle?> GetVehicleByDriverIdAsync(Guid driverId);
     }
 }

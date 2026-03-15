@@ -7,6 +7,9 @@ namespace CarpoolingSystem.Application.DTOs {
     public class RideRequestCreateDto {
 
         [Required]
+        public Guid DriverId { get; set; }
+
+        [Required]
         public LocationDto Pickup { get; set; } = new();
 
         [Required]
