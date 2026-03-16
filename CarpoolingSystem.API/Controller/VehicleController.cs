@@ -22,6 +22,30 @@ namespace CarpoolingSystem.API.Controller
             _mapper = mapper;
         }
 
+        [HttpGet]
+        [Route("mine")]
+        public async Task<IActionResult> GetMyVehicle()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                    return Unauthorized("User ID not found in token.");
+
+                Guid driverId = Guid.Parse(userIdClaim);
+                var vehicle = await _vehicleService.GetVehicleByDriverIdAsync(driverId);
+
+                if (vehicle == null)
+                    return NotFound("No vehicle found for this driver.");
+
+                return Ok(_mapper.Map<VehicleDTO>(vehicle));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost]
         [Route("add")]
         [Authorize]

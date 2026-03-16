@@ -2,7 +2,7 @@
 
 namespace CarpoolingSystem.Application.Interfaces
 {
-    public interface IDriverLocationStore
+    public interface IDriverLocationStoreService
     {
         void UpdateLocation(Guid driverId, double latitude, double longitude);
         IEnumerable<DriverLocationDto> GetAllLocations();

@@ -50,10 +50,8 @@ namespace CarpoolingSystem.Application.Services
                 user.Pin = await GenerateUniquePinAsync();
             }
 
-            // Save user first
             await _userRepository.AddAsync(user);
 
-            // Create vehicle if the user is a driver
             if (registerDto.Role == UserRole.Driver)
             {
                 var vehicle = new Vehicle
