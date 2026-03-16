@@ -25,6 +25,16 @@ namespace CarpoolingSystem.Application.Services
             var allDriverLocations = _driverLocationStore.GetAllLocations();
             var radiusKm = radiusMeters / 1000.0;
 
+            Console.WriteLine($"[NearbyDrivers] Total drivers in store: {allDriverLocations.Count()}");
+            Console.WriteLine($"[NearbyDrivers] Searching | Passenger: {latitude},{longitude} | Radius: {radiusMeters}m");
+            Console.WriteLine($"[NearbyDrivers] Total drivers in store: {allDriverLocations.Count()}");
+
+            foreach (var d in allDriverLocations)
+            {
+                var dist = CalculateDistanceKm(latitude, longitude, d.Latitude, d.Longitude);
+                Console.WriteLine($"[NearbyDrivers] Driver {d.DriverId} | Location: {d.Latitude},{d.Longitude} | Distance: {dist}km");
+            }
+
             var nearbyDriverLocations = allDriverLocations
                 .Where(driver => CalculateDistanceKm(latitude, longitude, driver.Latitude, driver.Longitude) <= radiusKm)
                 .ToList();
@@ -43,6 +53,7 @@ namespace CarpoolingSystem.Application.Services
 
                 if (activeSession == null || activeSession.AvailableSeats <= 0)
                 {
+                    Console.WriteLine("Driver has no active session");
                     continue; 
                 }
 

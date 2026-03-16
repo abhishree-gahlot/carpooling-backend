@@ -9,11 +9,13 @@ namespace CarpoolingSystem.Application.DTOs {
         public Guid VehicleId { get; set; }
 
         [Required]
-        [StringLength(100, MinimumLength = 2)]
+        [MinLength(2)]
+        [MaxLength(500)]
         public string Pickup { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100, MinimumLength = 2)]
+        [MinLength(2)]
+        [MaxLength(500)]
         public string Dropoff { get; set; } = string.Empty;
 
         
