@@ -57,6 +57,8 @@ namespace CarpoolingSystem.Infrastructure.Data
                 e.Property(r => r.DestinationLongitude).IsRequired();
                 e.Property(r => r.DestinationName).IsRequired();
 
+                e.Property(r => r.RespondedAt).IsRequired(false);
+
                 e.HasOne(r => r.Passenger)
                  .WithMany()
                  .HasForeignKey(r => r.PassengerId)
