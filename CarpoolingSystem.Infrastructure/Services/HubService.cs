@@ -16,6 +16,7 @@ public class HubService : IHubService
     public async Task NotifyDriverAsync(Guid driverUserId, string eventName, object data)
     {
         var connectionId = ConnectionStore.GetConnectionId(driverUserId);
+        Console.WriteLine($"[HubService] NotifyDriver | DriverId={driverUserId} ConnectionId={connectionId ?? "NOT FOUND"}");
 
         if (connectionId is not null)
             await _hubContext.Clients
