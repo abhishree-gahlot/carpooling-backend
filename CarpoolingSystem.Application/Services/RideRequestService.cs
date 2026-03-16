@@ -45,23 +45,12 @@ namespace CarpoolingSystem.Application.Services
             var created = await _rideRequestRepository.GetByIdAsync(request.Id)
                 ?? throw new Exception("Failed to retrieve created request.");
 
-            await _hubService.NotifyDriverAsync(dto.DriverId, "NewRideRequest", new
-            {
-                requestId = created.Id,
-                passengerName = created.Passenger.UserName,
-                pickup = created.PickupName,
-                destination = created.DestinationName,
-                pickupLat = created.PickupLatitude,
-                pickupLng = created.PickupLongitude
-            });
-
             return created;
         }
 
         public async Task<RideRequests> UpdateRequestAsync(
             Guid requestId, RideRequestUpdateDto dto)
         {
-
             var request = await _rideRequestRepository.GetByIdAsync(requestId);
 
             if (request == null)
