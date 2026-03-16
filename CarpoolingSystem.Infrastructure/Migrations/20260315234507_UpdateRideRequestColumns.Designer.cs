@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarpoolingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260315152457_SyncSchemaWithSSMS")]
-    partial class SyncSchemaWithSSMS
+    [Migration("20260315234507_UpdateRideRequestColumns")]
+    partial class UpdateRideRequestColumns
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,14 +31,26 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Destination")
+                    b.Property<double>("DestinationLatitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("DestinationLongitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("DestinationName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("PassengerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Pickup")
+                    b.Property<double>("PickupLatitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("PickupLongitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("PickupName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

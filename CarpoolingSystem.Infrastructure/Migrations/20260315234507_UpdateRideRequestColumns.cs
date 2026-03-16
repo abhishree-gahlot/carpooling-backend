@@ -5,7 +5,7 @@
 namespace CarpoolingSystem.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class SyncSchemaWithSSMS : Migration
+    public partial class UpdateRideRequestColumns : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
