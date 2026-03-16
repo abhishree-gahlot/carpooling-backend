@@ -14,12 +14,15 @@ namespace CarpoolingSystem.API.Controller {
     public class RideRequestController : ControllerBase {
         private readonly IRideRequestService _rideRequestService;
         private readonly IMapper _mapper;
+        private readonly IHubService _hubService;
 
         public RideRequestController(
             IRideRequestService rideRequestService,
-            IMapper mapper) {
+            IMapper mapper ,
+            IHubService hubService) {
             _rideRequestService = rideRequestService;
             _mapper = mapper;
+            _hubService = hubService;
         }
 
         [HttpPost("create")]
@@ -140,6 +143,33 @@ namespace CarpoolingSystem.API.Controller {
                 return Ok(_mapper.Map<IEnumerable<RideRequestDto>>(requests));
             }
             catch (Exception exception) {
+                return BadRequest(exception.Message);
+            }
+        }
+
+        [HttpPost("{requestId}/notify-driver/{driverId}")]
+        [Authorize(Roles = nameof(UserRole.Passenger))]
+        public async Task<IActionResult> NotifyDriver(Guid requestId, Guid driverId)
+        {
+            try
+            {
+                var request = await _rideRequestService.GetRequestByIdAsync(requestId);
+
+                if (request == null)
+                    return NotFound("Ride request not found.");
+
+                await _hubService.NotifyDriverAsync(driverId, "NewRideRequest", new
+                {
+                    requestId = request.Id,
+                    passengerName = request.Passenger?.UserName ?? "Passenger",
+                    pickup = request.PickupName,
+                    destination = request.DestinationName
+                });
+
+                return Ok();
+            }
+            catch (Exception exception)
+            {
                 return BadRequest(exception.Message);
             }
         }
