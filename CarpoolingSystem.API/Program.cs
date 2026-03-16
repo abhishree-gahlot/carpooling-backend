@@ -115,5 +115,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<RideHub>("/hubs/ride");
+app.MapFallbackToFile("index.html");
 
 app.Run();
