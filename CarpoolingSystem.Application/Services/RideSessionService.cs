@@ -10,10 +10,16 @@ namespace CarpoolingSystem.Application.Services {
     public class RideSessionService: IRideSessionService {
         private readonly IRideSessionRepository _rideSessionRepository;
         private readonly CarpoolingSystem.Domain.Repositories.IVehicleRepository _vehicleRepository;
+        private readonly IDriverLocationStoreService _driverLocationStore;
 
-        public RideSessionService(IRideSessionRepository rideSessionRepository, CarpoolingSystem.Domain.Repositories.IVehicleRepository vehicleRepository) {
+        public RideSessionService(
+            IRideSessionRepository rideSessionRepository, 
+            CarpoolingSystem.Domain.Repositories.IVehicleRepository vehicleRepository,
+            IDriverLocationStoreService driverLocationStore
+            ) {
             _rideSessionRepository = rideSessionRepository;
             _vehicleRepository = vehicleRepository;
+            _driverLocationStore = driverLocationStore;
         }
 
         public async Task<RideSession> CreateSessionAsync(RideSessionCreateDto dto, Guid driverId) {
@@ -91,6 +97,8 @@ namespace CarpoolingSystem.Application.Services {
             session.EndedAt = DateTime.UtcNow;
 
             _rideSessionRepository.Update(session);
+            await _rideSessionRepository.SaveChangesAsync();
+            _driverLocationStore.TryRemove(driverId);
             await _rideSessionRepository.SaveChangesAsync();
 
             return session;
