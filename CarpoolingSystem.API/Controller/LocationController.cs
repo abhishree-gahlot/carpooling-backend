@@ -1,11 +1,14 @@
-﻿using CarpoolingSystem.Application.Interfaces;
+﻿using CarpoolingSystem.Application.DTOs;
+using CarpoolingSystem.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CarpoolingSystem.API.Controller
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class LocationController: ControllerBase
+    public class LocationController : ControllerBase
     {
         private readonly ILocationService _locationService;
 
@@ -23,7 +26,7 @@ namespace CarpoolingSystem.API.Controller
         {
             var nearbyDrivers = await _locationService.GetNearbyDrivers(latitude, longitude, radius);
 
-            if(!nearbyDrivers.Any())
+            if (!nearbyDrivers.Any())
             {
                 return NotFound(new
                 {
@@ -38,13 +41,21 @@ namespace CarpoolingSystem.API.Controller
         }
 
         [HttpPut("update")]
+        [Authorize]
         public IActionResult UpdateDriverLocation(
-            [FromQuery] Guid driverId,
-            [FromQuery] double latitude,
-            [FromQuery] double longitude
+            [FromBody] UpdateLocationDto updateLocationDto
         )
         {
-            _locationService.UpdateDriverLocation(driverId, latitude, longitude);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized();
+            }
+
+            Guid driverId = Guid.Parse(userIdClaim);
+            _locationService.UpdateDriverLocation(driverId, updateLocationDto.Latitude, updateLocationDto.Longitude);
+
             return Ok(new
             {
                 message = "Driver location updated successfully."
