@@ -14,6 +14,16 @@ using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString)) {
+    throw new InvalidOperationException(
+        "Connection string 'DefaultConnection' is not set. " +"Please set the environment variable: ConnectionStrings__DefaultConnection"
+    );
+}
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRideSessionRepository, RideSessionRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
