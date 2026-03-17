@@ -20,7 +20,6 @@ namespace CarpoolingSystem.API.Controller {
         public RideSessionController(IRideSessionService rideSessionService, IMapper mapper) {
             _rideSessionService= rideSessionService;
             _mapper = mapper;
-            
         }
 
         [HttpPost("start")]
@@ -47,7 +46,7 @@ namespace CarpoolingSystem.API.Controller {
                 return BadRequest(new
                 {
                     message = exception.Message,
-                    inner = exception.InnerException?.Message  // ✅ add this
+                    inner = exception.InnerException?.Message
                 });
             }
         }

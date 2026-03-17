@@ -41,7 +41,9 @@ public class RideHub : Hub
     public override async Task OnConnectedAsync()
     {
         var userIdString = Context.User?
-            .FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        .FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+        ?? Context.User?
+        .FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         var role = Context.User?
             .FindFirst(ClaimTypes.Role)?.Value;
@@ -55,9 +57,12 @@ public class RideHub : Hub
             else
                 await Groups.AddToGroupAsync(Context.ConnectionId, "Passengers");
 
-           
-           Console.WriteLine($"[RideHub] Connected | UserId={userId} Role={role} ConnId={Context.ConnectionId}");
-            Console.WriteLine($"[RideHub] Total active connections: {ConnectionStore.GetAllConnections()}");
+            Console.WriteLine($"[RideHub] Connected | UserId={userId} Role={role} ConnId={Context.ConnectionId}");
+            Console.WriteLine($"[RideHub] All connections after add: {ConnectionStore.GetAllConnections()}");
+        }
+        else
+        {
+            Console.WriteLine($"[RideHub] WARNING: Could not parse userId from token. Raw value: {userIdString}");
         }
 
         await base.OnConnectedAsync();
@@ -72,6 +77,7 @@ public class RideHub : Hub
         {
             ConnectionStore.Remove(userId);
             Console.WriteLine($"[RideHub] Disconnected | UserId={userId}");
+            Console.WriteLine($"[RideHub] All connections after remove: {ConnectionStore.GetAllConnections()}");
         }
 
         await base.OnDisconnectedAsync(exception);
