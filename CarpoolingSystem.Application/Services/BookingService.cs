@@ -59,8 +59,6 @@ namespace CarpoolingSystem.Application.Services {
             if (booking.Status != BookingStatus.Pending)
                 throw new Exception("Only pending bookings can be accepted.");
 
-            var random = new Random();
-            booking.PIN = random.Next(1000, 9999).ToString();
             booking.Status = BookingStatus.Accepted;
             booking.AcceptedAt = DateTime.UtcNow;
 
