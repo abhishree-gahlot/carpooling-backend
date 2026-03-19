@@ -22,50 +22,6 @@ namespace CarpoolingSystem.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CarpoolingSystem.Domain.Entities.Booking", b =>
-                {
-                    b.Property<Guid>("BookingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("AcceptedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("BoardedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("EndedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PIN")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
-
-                    b.Property<Guid>("RideRequestId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SessionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("BookingId");
-
-                    b.HasIndex("RideRequestId");
-
-                    b.HasIndex("SessionId");
-
-                    b.ToTable("Bookings");
-                });
-
             modelBuilder.Entity("CarpoolingSystem.Domain.Entities.RideRequests", b =>
                 {
                     b.Property<Guid>("Id")
@@ -226,25 +182,6 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                     b.HasIndex("DriverId");
 
                     b.ToTable("Vehicles");
-                });
-
-            modelBuilder.Entity("CarpoolingSystem.Domain.Entities.Booking", b =>
-                {
-                    b.HasOne("CarpoolingSystem.Domain.Entities.RideRequests", "RideRequest")
-                        .WithMany()
-                        .HasForeignKey("RideRequestId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("CarpoolingSystem.Domain.Entities.RideSession", "RideSession")
-                        .WithMany()
-                        .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("RideRequest");
-
-                    b.Navigation("RideSession");
                 });
 
             modelBuilder.Entity("CarpoolingSystem.Domain.Entities.RideRequests", b =>
