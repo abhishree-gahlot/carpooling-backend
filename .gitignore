@@ -25,11 +25,7 @@ packages/
 
 ## Environment files
 .env
-*.env
 appsettings.Development.json
-
-# User secrets
-secrets.json
 
 ## Test results
 TestResults/
