@@ -59,7 +59,7 @@ namespace CarpoolingSystem.API.Controller {
         }
 
         [HttpPost("verifypin/{id}")]
-        [Authorize(Roles = nameof(UserRole.Passenger))]
+        [Authorize(Roles = nameof(UserRole.Driver))]
         public async Task<IActionResult> VerifyPin(
             Guid id, [FromBody] BookingVerifyPinDto dto) {
             try {

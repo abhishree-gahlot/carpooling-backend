@@ -13,6 +13,7 @@ namespace CarpoolingSystem.Application.DTOs {
         public string VehicleName { get; set; } = string.Empty;
         public string PassengerName { get; set; } = string.Empty;
         public string PIN { get; set; } = string.Empty;
+        public decimal Fare { get; set; }
         public BookingStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? AcceptedAt { get; set; }

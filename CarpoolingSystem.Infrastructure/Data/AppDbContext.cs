@@ -68,7 +68,9 @@ namespace CarpoolingSystem.Infrastructure.Data
                  .ValueGeneratedOnAdd();
 
                 e.Property(b => b.PIN)
-                 .HasMaxLength(4);
+                 .HasMaxLength(6);
+                e.Property(b => b.Fare).HasPrecision(10, 2)
+                .HasDefaultValue(0m);
 
                 e.HasOne(b => b.RideRequest)
                  .WithMany()

@@ -1,4 +1,5 @@
 ﻿using CarpoolingSystem.Application.DTOs;
+using CarpoolingSystem.Application.Helper;
 using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Domain.Entities;
 using CarpoolingSystem.Domain.Enums;
@@ -11,10 +12,13 @@ namespace CarpoolingSystem.Application.Services {
     public class BookingService : IBookingService {
         private readonly IBookingRepository _bookingRepository;
         private readonly IRideSessionRepository _rideSessionRepository;
+        private readonly IUserRepository _userRepository;
+        private const decimal RatePerKm = 9.0m;
 
-        public BookingService(IBookingRepository bookingRepository,IRideSessionRepository rideSessionRepository) {
+        public BookingService(IBookingRepository bookingRepository,IRideSessionRepository rideSessionRepository, IUserRepository userRepository) {
             _bookingRepository = bookingRepository;
             _rideSessionRepository = rideSessionRepository;
+            _userRepository=userRepository;
         }
 
         public async Task<Booking> CreateBookingAsync(BookingCreateDto dto) {
@@ -40,6 +44,7 @@ namespace CarpoolingSystem.Application.Services {
                 RideRequestId = dto.RideRequestId,
                 SessionId = dto.SessionId,
                 PIN = string.Empty,
+                Fare=0,
                 Status = BookingStatus.Pending,
                 CreatedAt = DateTime.UtcNow
             };
@@ -59,6 +64,27 @@ namespace CarpoolingSystem.Application.Services {
             if (booking.Status != BookingStatus.Pending)
                 throw new Exception("Only pending bookings can be accepted.");
 
+            var passenger = await _userRepository
+                .GetByIdAsync(booking.RideRequest.PassengerId);
+
+            if (passenger == null)
+                throw new Exception("Passenger not found.");
+
+            if (string.IsNullOrEmpty(passenger.Pin))
+                throw new Exception(
+                    "Passenger has not been assigned a PIN");
+
+            double distanceKm = DistanceHelper.CalculateDistanceKm(
+                booking.RideRequest.PickupLatitude,
+                booking.RideRequest.PickupLongitude,
+                booking.RideRequest.DestinationLatitude,
+                booking.RideRequest.DestinationLongitude);
+
+            decimal fare = Math.Round(
+                (decimal)distanceKm * RatePerKm, 2);
+
+            booking.PIN = passenger.Pin;
+            booking.Fare = fare;
             booking.Status = BookingStatus.Accepted;
             booking.AcceptedAt = DateTime.UtcNow;
 

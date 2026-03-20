@@ -32,5 +32,10 @@ namespace CarpoolingSystem.Infrastructure.Repositories
         {
             return await _context.Users.AnyAsync(user => user.Pin == pin);
         }
+
+        public async Task<User?> GetByIdAsync(Guid userId) {
+            return await _context.Users
+                .FirstOrDefaultAsync(user => user.UserId == userId);
+        }
     }
 }

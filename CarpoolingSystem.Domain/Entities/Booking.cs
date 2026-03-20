@@ -12,6 +12,7 @@ namespace CarpoolingSystem.Domain.Entities {
         public Guid SessionId { get; set; }
         public RideSession RideSession { get; set; } = null!;
         public string PIN { get; set; } = string.Empty;
+        public decimal Fare { get; set; } = 0;
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? AcceptedAt { get; set; }
