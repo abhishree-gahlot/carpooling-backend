@@ -8,5 +8,6 @@ namespace CarpoolingSystem.Application.Interfaces
     {
         Task<string> LoginAsync(LoginRequestDto loginDto);
         Task RegisterAsync(RegisterRequestDto registerDto);
+        Task<User?> GetUserByIdAsync(Guid userId);
     }
 }
