@@ -1,4 +1,5 @@
 ﻿using CarpoolingSystem.Application.DTOs;
+using CarpoolingSystem.Domain.Entities;
 using System.Threading.Tasks;
 
 namespace CarpoolingSystem.Application.Interfaces
