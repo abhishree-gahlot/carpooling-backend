@@ -36,11 +36,13 @@ builder.Services.AddAutoMapper(cfg => {
     cfg.AddProfile<RideRequestProfile>();
 });
 
-var jwtSettings = builder.Configuration.GetSection("Jwt"); var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
+var jwtSettings = builder.Configuration.GetSection("Jwt"); 
+var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options => {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -64,8 +66,7 @@ builder.Services.AddAuthentication(options =>
             var token = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
 
-            if (!string.IsNullOrEmpty(token) &&
-                path.StartsWithSegments("/hubs/ride"))
+            if (!string.IsNullOrEmpty(token) && path.StartsWithSegments("/hubs/ride"))
             {
                 context.Token = token;
             }
@@ -73,9 +74,12 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
-builder.Services.AddControllers(); builder.Services.AddEndpointsApiExplorer(); builder.Services.AddSwaggerGen();
+builder.Services.AddControllers(); 
+builder.Services.AddEndpointsApiExplorer(); 
+builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AngularPolicy", policy =>
