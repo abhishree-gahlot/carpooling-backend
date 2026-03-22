@@ -14,6 +14,16 @@ using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString)) {
+    throw new InvalidOperationException(
+        "Connection string 'DefaultConnection' is not set. " +"Please set the environment variable: ConnectionStrings__DefaultConnection"
+    );
+}
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRideSessionRepository, RideSessionRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
@@ -28,7 +38,8 @@ builder.Services.AddScoped<IRideRequestRepository, RideRequestRepository>();
 builder.Services.AddScoped<IRideRequestService, RideRequestService>();
 
 builder.Services.AddScoped<ILocationService, LocationService>();
-builder.Services.AddScoped<IHubService, HubService>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 
 builder.Services.AddSingleton<IDriverLocationStoreService, DriverLocationStoreService>();
 builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
@@ -38,6 +49,11 @@ builder.Services.AddAutoMapper(cfg => {
 });
 
 
+builder.Services.AddScoped<IHubService, HubService>();
+
+builder.Services.AddSingleton<IDriverLocationStoreService, DriverLocationStoreService>();
+builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
+builder.Services.AddSignalR();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
