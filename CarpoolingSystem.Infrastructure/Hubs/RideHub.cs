@@ -32,6 +32,7 @@ public class RideHub : Hub
             rideRequestId = dto.RideRequestId,
             passengerName = passengerName,
             pickupName = dto.PickupName,
+            passengerId = rideRequest?.PassengerId,
             pickupLat = dto.PickupLat,
             pickupLng = dto.PickupLng,
             destinationName = dto.DestinationName
@@ -81,5 +82,29 @@ public class RideHub : Hub
         }
 
         await base.OnDisconnectedAsync(exception);
+    }
+
+    public async Task ConfirmPayment(PaymentConfirmationDto dto)
+    {
+        await _hubService.NotifyPassengerAsync(dto.PassengerId, "PaymentConfirmed", new
+        {
+            rideRequestId = dto.RideRequestId
+        });
+    }
+
+    public async Task DenyPayment(PaymentConfirmationDto dto)
+    {
+        await _hubService.NotifyPassengerAsync(dto.PassengerId, "PaymentDenied", new
+        {
+            rideRequestId = dto.RideRequestId
+        });
+    }
+
+    public async Task NotifyDriverPassengerPaid(PaymentMadeDto dto)
+    {
+        await _hubService.NotifyDriverAsync(dto.DriverId, "PassengerPaid", new
+        {
+            rideRequestId = dto.RideRequestId
+        });
     }
 }
