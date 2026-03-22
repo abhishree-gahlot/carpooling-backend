@@ -33,8 +33,11 @@ builder.Services.AddScoped<IHubService, HubService>();
 builder.Services.AddSingleton<IDriverLocationStoreService, DriverLocationStoreService>();
 builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
 builder.Services.AddSignalR();
+builder.Services.AddAutoMapper(cfg => {
+    cfg.AddProfile<RideRequestProfile>();
+});
 
-builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
+
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
@@ -86,6 +89,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 builder.Services.AddCors(options =>
 {

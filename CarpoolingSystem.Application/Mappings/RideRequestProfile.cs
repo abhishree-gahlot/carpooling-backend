@@ -11,30 +11,29 @@ namespace CarpoolingSystem.Application.Mappings {
         public RideRequestProfile() {
 
             CreateMap<RideRequests, RideRequestDto>()
-                 .ForMember(
-                     destination => destination.RequestId,
-                     options => options.MapFrom(
-                         source => source.Id))
-                 .ForMember(
-                     destination => destination.PassengerName,
-                     options => options.MapFrom(
-                         source => source.Passenger.UserName))
+            .ForMember(dest => dest.RequestId,
+                opt => opt.MapFrom(src => src.Id))
 
-                 .ForMember(
-                     destination => destination.Pickup,
-                     options => options.MapFrom(source => new LocationDto {
-                         Latitude = source.PickupLatitude,
-                         Longitude = source.PickupLongitude,
-                         Name = source.PickupName
-                     }))
+            .ForMember(dest => dest.PassengerName,
+                opt => opt.MapFrom(src => src.Passenger != null
+                    ? src.Passenger.UserName
+                    : string.Empty))
 
-                 .ForMember(
-                     destination => destination.Destination,
-                     options => options.MapFrom(source => new LocationDto {
-                         Latitude = source.DestinationLatitude,
-                         Longitude = source.DestinationLongitude,
-                         Name = source.DestinationName
-                     }));
+            .ForMember(dest => dest.Pickup,
+                opt => opt.MapFrom(src => new LocationDto
+                {
+                    Latitude = src.PickupLatitude,
+                    Longitude = src.PickupLongitude,
+                    Name = src.PickupName
+                }))
+
+            .ForMember(dest => dest.Destination,
+                opt => opt.MapFrom(src => new LocationDto
+                {
+                    Latitude = src.DestinationLatitude,
+                    Longitude = src.DestinationLongitude,
+                    Name = src.DestinationName
+                }));
 
             CreateMap<RideRequestUpdateDto, RideRequests>()
                 .ForAllMembers(mappingOptions =>

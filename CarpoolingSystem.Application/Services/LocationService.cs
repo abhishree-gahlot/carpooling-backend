@@ -60,6 +60,7 @@ namespace CarpoolingSystem.Application.Services
                 result.Add(new NearbyDriverDto
                 {
                     DriverId = driverLocation.DriverId,
+                    SessionId = activeSession.SessionId,
                     DriverName = activeSession.Driver.UserName,
                     VehicleName = activeSession.Vehicle.VehicleName,
                     LicensePlate = activeSession.Vehicle.LicensePlate,
