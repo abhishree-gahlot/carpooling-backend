@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarpoolingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260320044240_FixFarePrecision")]
-    partial class FixFarePrecision
+    [Migration("20260322014502_SyncBookingsTable")]
+    partial class SyncBookingsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

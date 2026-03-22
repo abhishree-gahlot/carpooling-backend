@@ -13,5 +13,7 @@ namespace CarpoolingSystem.Application.DTOs
         public double PickupLat { get; set; }
         public double PickupLng { get; set; }
         public string DestinationName { get; set; } = string.Empty;
+        public double DestinationLat { get; set; }
+        public double DestinationLng { get; set; }
     }
 }

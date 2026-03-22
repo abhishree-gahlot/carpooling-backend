@@ -35,7 +35,9 @@ public class RideHub : Hub
             pickupName = dto.PickupName,
             pickupLat = dto.PickupLat,
             pickupLng = dto.PickupLng,
-            destinationName = dto.DestinationName
+            destinationName = dto.DestinationName,
+            destinationLat = rideRequest?.DestinationLatitude,  
+            destinationLng = rideRequest?.DestinationLongitude  
         });
     }
 

@@ -55,24 +55,43 @@ namespace CarpoolingSystem.Application.Services {
             return await _bookingRepository.GetByIdAsync(booking.BookingId)?? throw new Exception("Failed to retrieve created booking.");
         }
 
-        public async Task<Booking> AcceptBookingAsync(Guid bookingId) {
-            var booking = await _bookingRepository.GetByIdAsync(bookingId);
+        public async Task<Booking> AcceptBookingAsync(Guid rideRequestId, Guid sessionId)
+        {
+            var existing = await _bookingRepository.GetByRideRequestIdAsync(rideRequestId);
 
-            if (booking == null)
-                throw new Exception("Booking not found.");
+            Booking booking;
+            if (existing == null)
+            {
+                booking = new Booking
+                {
+                    BookingId = Guid.NewGuid(),
+                    RideRequestId = rideRequestId,
+                    SessionId = sessionId,
+                    PIN = string.Empty,
+                    Fare = 0,
+                    Status = BookingStatus.Pending,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _bookingRepository.AddAsync(booking);
+                await _bookingRepository.SaveChangesAsync();
+                booking = await _bookingRepository.GetByIdAsync(booking.BookingId)
+                    ?? throw new Exception("Failed to retrieve created booking.");
+            }
+            else
+            {
+                booking = existing;
+            }
 
             if (booking.Status != BookingStatus.Pending)
                 throw new Exception("Only pending bookings can be accepted.");
 
-            var passenger = await _userRepository
-                .GetByIdAsync(booking.RideRequest.PassengerId);
+            var passenger = await _userRepository.GetByIdAsync(booking.RideRequest.PassengerId);
 
             if (passenger == null)
                 throw new Exception("Passenger not found.");
 
             if (string.IsNullOrEmpty(passenger.Pin))
-                throw new Exception(
-                    "Passenger has not been assigned a PIN");
+                throw new Exception("Passenger has not been assigned a PIN");
 
             double distanceKm = DistanceHelper.CalculateDistanceKm(
                 booking.RideRequest.PickupLatitude,
@@ -80,8 +99,7 @@ namespace CarpoolingSystem.Application.Services {
                 booking.RideRequest.DestinationLatitude,
                 booking.RideRequest.DestinationLongitude);
 
-            decimal fare = Math.Round(
-                (decimal)distanceKm * RatePerKm, 2);
+            decimal fare = Math.Round((decimal)distanceKm * RatePerKm, 2);
 
             booking.PIN = passenger.Pin;
             booking.Fare = fare;
