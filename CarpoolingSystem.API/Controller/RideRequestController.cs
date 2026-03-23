@@ -164,6 +164,7 @@ namespace CarpoolingSystem.API.Controller {
                 {
                     requestId = request.Id,
                     passengerName = request.Passenger?.UserName ?? "Passenger",
+                    passengerId = request.PassengerId,
                     pickup = request.PickupName,
                     destination = request.DestinationName
                 });
