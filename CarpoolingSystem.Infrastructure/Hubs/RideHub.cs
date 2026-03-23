@@ -107,4 +107,12 @@ public class RideHub : Hub
             rideRequestId = dto.RideRequestId
         });
     }
+
+    public async Task CancelRequest(CancelRequestDto dto)
+    {
+        await _hubService.NotifyDriverAsync(dto.DriverId, "RequestCancelled", new
+        {
+            rideRequestId = dto.RideRequestId
+        });
+    }
 }
