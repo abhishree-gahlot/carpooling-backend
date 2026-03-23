@@ -29,18 +29,20 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRideSessionRepository, RideSessionRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IRideRequestRepository, RideRequestRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IDriverHistoryRepository, DriverHistoryRepository>();
+builder.Services.AddScoped<IDriverHistoryPassengerRepository, DriverHistoryPassengerRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
 builder.Services.AddScoped<IRideSessionService, RideSessionService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
-builder.Services.AddScoped<IRideRequestRepository, RideRequestRepository>();
 builder.Services.AddScoped<IRideRequestService, RideRequestService>();
-
+builder.Services.AddScoped<IDriverHistoryService, DriverHistoryService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
-builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IDriverHistoryPassengerService, DriverHistoryPassengerService>();
 
 builder.Services.AddSingleton<IDriverLocationStoreService, DriverLocationStoreService>();
 builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
