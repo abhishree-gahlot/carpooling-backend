@@ -8,7 +8,7 @@ namespace CarpoolingSystem.Application.Interfaces {
     public interface IBookingService {
 
         Task<Booking> CreateBookingAsync(BookingCreateDto dto);
-        Task<Booking> AcceptBookingAsync(Guid bookingId);
+        Task<Booking> AcceptBookingAsync(Guid rideRequestId, Guid sessionId);
         Task<Booking> RejectBookingAsync(Guid bookingId);
         Task<Booking> VerifyPinAsync(Guid bookingId, BookingVerifyPinDto dto);
         Task<Booking> CompleteBookingAsync(Guid bookingId);

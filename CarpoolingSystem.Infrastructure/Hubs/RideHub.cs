@@ -30,11 +30,14 @@ public class RideHub : Hub
         await _hubService.NotifyDriverAsync(dto.DriverId, "NewRideRequest", new
         {
             rideRequestId = dto.RideRequestId,
+            sessionId = dto.SessionId,
             passengerName = passengerName,
             pickupName = dto.PickupName,
             pickupLat = dto.PickupLat,
             pickupLng = dto.PickupLng,
-            destinationName = dto.DestinationName
+            destinationName = dto.DestinationName,
+            destinationLat = rideRequest?.DestinationLatitude,  
+            destinationLng = rideRequest?.DestinationLongitude  
         });
     }
 
