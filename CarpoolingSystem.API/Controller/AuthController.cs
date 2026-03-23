@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using CarpoolingSystem.Application.DTOs;
+﻿using CarpoolingSystem.Application.DTOs;
 using CarpoolingSystem.Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CarpoolingSystem.API.Controllers
 {

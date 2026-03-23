@@ -15,9 +15,10 @@ using AutoMapper;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (string.IsNullOrEmpty(connectionString)) {
+if (string.IsNullOrEmpty(connectionString))
+{
     throw new InvalidOperationException(
-        "Connection string 'DefaultConnection' is not set. " +"Please set the environment variable: ConnectionStrings__DefaultConnection"
+        "Connection string 'DefaultConnection' is not set. " + "Please set the environment variable: ConnectionStrings__DefaultConnection"
     );
 }
 

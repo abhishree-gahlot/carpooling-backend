@@ -101,5 +101,10 @@ namespace CarpoolingSystem.Application.Services
 
             return pin;
         }
+
+        public async Task<User?> GetUserByIdAsync(Guid userId)
+        {
+            return await _userRepository.GetByIdAsync(userId);
+        }
     }
 }

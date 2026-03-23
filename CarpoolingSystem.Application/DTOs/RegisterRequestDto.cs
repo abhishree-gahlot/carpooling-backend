@@ -24,8 +24,7 @@ namespace CarpoolingSystem.Application.DTOs
         [Required]
         public UserRole Role { get; set; } = UserRole.Passenger;
 
-        //[Required]
-        [StringLength(50, MinimumLength = 2)]
+        [StringLength(50, MinimumLength=2)]
         public string? VehicleName { get; set; }
 
         [Range(1, 6, ErrorMessage = "Vehicle must have between 1 and 6 seats.")]
