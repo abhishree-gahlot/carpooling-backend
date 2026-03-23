@@ -9,16 +9,12 @@ namespace CarpoolingSystem.Application.DTOs {
         public Guid VehicleId { get; set; }
 
         [Required]
-        [MinLength(2)]
-        [MaxLength(500)]
-        public string Pickup { get; set; } = string.Empty;
+        public LocationDto Pickup { get; set; } = new();
 
         [Required]
-        [MinLength(2)]
-        [MaxLength(500)]
-        public string Dropoff { get; set; } = string.Empty;
+        public LocationDto Destination { get; set; } = new();
 
-        
+
         [Range(1, 6, ErrorMessage = "Available seats must be between 1 and 6.")]
         public int? AvailableSeats { get; set; }
     }

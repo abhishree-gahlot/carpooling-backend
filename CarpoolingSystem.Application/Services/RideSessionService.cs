@@ -50,8 +50,12 @@ namespace CarpoolingSystem.Application.Services {
                 VehicleId = dto.VehicleId,
                 TotalSeats = vehicle.MaxSeats,
                 AvailableSeats = seats,
-                Pickup = dto.Pickup,
-                Dropoff = dto.Dropoff,
+                PickupLatitude = dto.Pickup.Latitude,
+                PickupLongitude = dto.Pickup.Longitude,
+                PickupName = dto.Pickup.Name,
+                DestinationLatitude = dto.Destination.Latitude,
+                DestinationLongitude = dto.Destination.Longitude,
+                DestinationName = dto.Destination.Name,
                 IsActive = true,
                 StartedAt = DateTime.UtcNow
             };
@@ -69,11 +73,17 @@ namespace CarpoolingSystem.Application.Services {
             if (session == null)
                 throw new Exception("Ride session not found.");
 
-            if (dto.Pickup != null)
-                session.Pickup = dto.Pickup;
+            if (dto.Pickup != null) {
+                session.PickupLatitude = dto.Pickup.Latitude;
+                session.PickupLongitude = dto.Pickup.Longitude;
+                session.PickupName = dto.Pickup.Name;
+            }
 
-            if (dto.Dropoff != null)
-                session.Dropoff = dto.Dropoff;
+            if (dto.Destination != null) {
+                session.DestinationLatitude = dto.Destination.Latitude;
+                session.DestinationLongitude = dto.Destination.Longitude;
+                session.DestinationName = dto.Destination.Name;
+            }
             if (dto.AvailableSeats.HasValue)
                 session.AvailableSeats = dto.AvailableSeats.Value;
 
