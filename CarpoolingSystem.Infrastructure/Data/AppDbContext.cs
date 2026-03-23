@@ -24,7 +24,15 @@ namespace CarpoolingSystem.Infrastructure.Data
                 e.HasKey(r => r.Id);
 
                 e.Property(r => r.Id)
-                 .ValueGeneratedOnAdd(); 
+                 .ValueGeneratedOnAdd();
+
+                e.Property(r => r.PickupLatitude).IsRequired();
+                e.Property(r => r.PickupLongitude).IsRequired();
+                e.Property(r => r.PickupName).IsRequired().HasMaxLength(500);
+
+                e.Property(r => r.DestinationLatitude).IsRequired();
+                e.Property(r => r.DestinationLongitude).IsRequired();
+                e.Property(r => r.DestinationName).IsRequired().HasMaxLength(500);
 
                 e.HasOne(r => r.Driver)
                  .WithMany()

@@ -10,8 +10,12 @@ namespace CarpoolingSystem.Domain.Entities {
         public User Driver { get; set; } = null!;
         public Guid VehicleId { get; set; }
         public Vehicle Vehicle { get; set; } = null!;
-        public string Pickup {  get; set; } = string.Empty;
-        public string Dropoff { get; set; } = string.Empty;
+        public double PickupLatitude { get; set; }
+        public double PickupLongitude { get; set; }
+        public string PickupName { get; set; } = string.Empty;
+        public double DestinationLatitude { get; set; }
+        public double DestinationLongitude { get; set; }
+        public string DestinationName { get; set; } = string.Empty;
         public int TotalSeats { get; set; }
         public int AvailableSeats { get; set; }
         public bool IsActive { get; set; }

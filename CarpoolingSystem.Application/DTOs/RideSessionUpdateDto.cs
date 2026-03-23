@@ -6,11 +6,8 @@ using System.Text;
 namespace CarpoolingSystem.Application.DTOs {
     public class RideSessionUpdateDto {
 
-        [StringLength(100, MinimumLength = 2)]
-        public string? Pickup { get; set; }
-
-        [StringLength(100, MinimumLength = 2)]
-        public string? Dropoff { get; set; }
+        public LocationDto? Pickup { get; set; }
+        public LocationDto? Destination { get; set; }
 
         [Range(1, 6, ErrorMessage = "Available seats must be between 1 and 6.")]
         public int? AvailableSeats { get; set; }

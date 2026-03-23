@@ -45,8 +45,8 @@ namespace CarpoolingSystem.Application.Services {
                 DriverHistoryId = Guid.NewGuid(),
                 RideSessionId = rideSessionId,
                 DriverId = session.DriverId,
-                StartingLocation = session.Pickup,
-                DestinationLocation = session.Dropoff,
+                StartingLocation = session.PickupName,
+                DestinationLocation = session.DestinationName,
                 DateAndTime = session.StartedAt,
                 DropOffTime = session.EndedAt,
                 TotalFare = totalFare
