@@ -21,19 +21,6 @@ namespace CarpoolingSystem.API.Controller {
             _mapper = mapper;
         }
 
-        //[HttpPost("create")]
-        //[Authorize(Roles = nameof(UserRole.Passenger))]
-        //public async Task<IActionResult> CreateBooking(
-        //    [FromBody] BookingCreateDto dto) {
-        //    try {
-        //        var booking = await _bookingService.CreateBookingAsync(dto);
-        //        return Ok(_mapper.Map<BookingDto>(booking));
-        //    }
-        //    catch (Exception exception) {
-        //        return BadRequest(exception.Message);
-        //    }
-        //}
-
         [HttpPost("accept/{rideRequestId}/{sessionId}")]
         [Authorize(Roles = nameof(UserRole.Driver))]
         public async Task<IActionResult> AcceptBooking(Guid rideRequestId, Guid sessionId)

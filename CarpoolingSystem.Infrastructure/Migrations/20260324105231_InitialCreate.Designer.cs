@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarpoolingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260322014502_SyncBookingsTable")]
-    partial class SyncBookingsTable
+    [Migration("20260324105231_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,6 +75,93 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                     b.ToTable("Bookings");
                 });
 
+            modelBuilder.Entity("CarpoolingSystem.Domain.Entities.DriverHistory", b =>
+                {
+                    b.Property<Guid>("DriverHistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateAndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DestinationLocation")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("DriverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DropOffTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("RideSessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("StartingLocation")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal?>("TotalFare")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("DriverHistoryId");
+
+                    b.HasIndex("DriverId")
+                        .HasDatabaseName("IX_DriverHistories_DriverId");
+
+                    b.HasIndex("RideSessionId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_DriverHistories_RideSessionId");
+
+                    b.ToTable("DriverHistories");
+                });
+
+            modelBuilder.Entity("CarpoolingSystem.Domain.Entities.DriverHistoryPassenger", b =>
+                {
+                    b.Property<Guid>("PassengerHistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DriverHistoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("Fare")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("PassengerName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Pickup")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("PickupTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("Ratings")
+                        .HasPrecision(3, 1)
+                        .HasColumnType("decimal(3,1)");
+
+                    b.Property<Guid>("RideId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("PassengerHistoryId");
+
+                    b.HasIndex("DriverHistoryId")
+                        .HasDatabaseName("IX_DriverHistoryPassengers_DriverHistoryId");
+
+                    b.HasIndex("RideId");
+
+                    b.ToTable("DriverHistoryPassengers");
+                });
+
             modelBuilder.Entity("CarpoolingSystem.Domain.Entities.RideRequests", b =>
                 {
                     b.Property<Guid>("Id")
@@ -129,12 +216,19 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                     b.Property<int>("AvailableSeats")
                         .HasColumnType("int");
 
+                    b.Property<double>("DestinationLatitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("DestinationLongitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("DestinationName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<Guid>("DriverId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Dropoff")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("EndedAt")
                         .HasColumnType("datetime2");
@@ -142,9 +236,16 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Pickup")
+                    b.Property<double>("PickupLatitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("PickupLongitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("PickupName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("datetime2");
@@ -256,6 +357,44 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                     b.Navigation("RideSession");
                 });
 
+            modelBuilder.Entity("CarpoolingSystem.Domain.Entities.DriverHistory", b =>
+                {
+                    b.HasOne("CarpoolingSystem.Domain.Entities.User", "Driver")
+                        .WithMany()
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("CarpoolingSystem.Domain.Entities.RideSession", "RideSession")
+                        .WithMany()
+                        .HasForeignKey("RideSessionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Driver");
+
+                    b.Navigation("RideSession");
+                });
+
+            modelBuilder.Entity("CarpoolingSystem.Domain.Entities.DriverHistoryPassenger", b =>
+                {
+                    b.HasOne("CarpoolingSystem.Domain.Entities.DriverHistory", "DriverHistory")
+                        .WithMany("Passengers")
+                        .HasForeignKey("DriverHistoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CarpoolingSystem.Domain.Entities.RideRequests", "RideRequests")
+                        .WithMany()
+                        .HasForeignKey("RideId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("DriverHistory");
+
+                    b.Navigation("RideRequests");
+                });
+
             modelBuilder.Entity("CarpoolingSystem.Domain.Entities.RideRequests", b =>
                 {
                     b.HasOne("CarpoolingSystem.Domain.Entities.User", "Passenger")
@@ -295,6 +434,11 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Driver");
+                });
+
+            modelBuilder.Entity("CarpoolingSystem.Domain.Entities.DriverHistory", b =>
+                {
+                    b.Navigation("Passengers");
                 });
 #pragma warning restore 612, 618
         }

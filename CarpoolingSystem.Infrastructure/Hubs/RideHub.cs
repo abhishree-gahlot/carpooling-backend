@@ -118,4 +118,17 @@ public class RideHub : Hub
             rideRequestId = dto.RideRequestId
         });
     }
+    public async Task NotifyPassengerPinVerified(NotifyPinVerifiedDto dto)
+    {
+        if (!Guid.TryParse(dto.PassengerId, out Guid passengerId))
+        {
+            Console.WriteLine($"[RideHub] Invalid PassengerId: '{dto.PassengerId}'");
+            return;
+        }
+
+        await _hubService.NotifyPassengerAsync(passengerId, "PinVerified", new
+        {
+            success = dto.Success
+        });
+    }
 }
