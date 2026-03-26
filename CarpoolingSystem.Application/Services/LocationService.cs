@@ -26,16 +26,6 @@ namespace CarpoolingSystem.Application.Services
             var allDriverLocations = _driverLocationStore.GetAllLocations();
             var radiusKm = radiusMeters / 1000.0;
 
-            Console.WriteLine($"[NearbyDrivers] Total drivers in store: {allDriverLocations.Count()}");
-            Console.WriteLine($"[NearbyDrivers] Searching | Passenger: {latitude},{longitude} | Radius: {radiusMeters}m");
-            Console.WriteLine($"[NearbyDrivers] Total drivers in store: {allDriverLocations.Count()}");
-
-            foreach (var d in allDriverLocations)
-            {
-                var dist = DistanceHelper.CalculateDistanceKm(latitude, longitude, d.Latitude, d.Longitude);
-                Console.WriteLine($"[NearbyDrivers] Driver {d.DriverId} | Location: {d.Latitude},{d.Longitude} | Distance: {dist}km");
-            }
-
             var nearbyDriverLocations = allDriverLocations
                 .Where(driver => DistanceHelper.CalculateDistanceKm(latitude, longitude, driver.Latitude, driver.Longitude) <= radiusKm)
                 .ToList();
@@ -61,6 +51,7 @@ namespace CarpoolingSystem.Application.Services
                 result.Add(new NearbyDriverDto
                 {
                     DriverId = driverLocation.DriverId,
+                    SessionId = activeSession.Id,
                     DriverName = activeSession.Driver.UserName,
                     VehicleName = activeSession.Vehicle.VehicleName,
                     LicensePlate = activeSession.Vehicle.LicensePlate,

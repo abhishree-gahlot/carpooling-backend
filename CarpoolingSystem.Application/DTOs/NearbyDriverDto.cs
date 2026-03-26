@@ -6,6 +6,7 @@ namespace CarpoolingSystem.Application.DTOs {
     public class NearbyDriverDto {
 
         public Guid DriverId { get; set; }
+        public Guid SessionId { get; set; }
         public string DriverName { get; set; } = String.Empty;
         public string VehicleName { get; set; } = String.Empty;
         public string LicensePlate { get; set; } = String.Empty;
@@ -16,3 +17,4 @@ namespace CarpoolingSystem.Application.DTOs {
         public DateTime LastUpdated { get; set; }
     }
 }
+    

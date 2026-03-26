@@ -5,7 +5,7 @@
 namespace CarpoolingSystem.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class FixFarePrecision : Migration
+    public partial class SyncBookingsTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

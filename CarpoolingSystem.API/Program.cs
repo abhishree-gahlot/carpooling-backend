@@ -15,9 +15,10 @@ using AutoMapper;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (string.IsNullOrEmpty(connectionString)) {
+if (string.IsNullOrEmpty(connectionString))
+{
     throw new InvalidOperationException(
-        "Connection string 'DefaultConnection' is not set. " +"Please set the environment variable: ConnectionStrings__DefaultConnection"
+        "Connection string 'DefaultConnection' is not set. " + "Please set the environment variable: ConnectionStrings__DefaultConnection"
     );
 }
 
@@ -46,6 +47,11 @@ builder.Services.AddScoped<IDriverHistoryPassengerService, DriverHistoryPassenge
 builder.Services.AddSingleton<IDriverLocationStoreService, DriverLocationStoreService>();
 builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
 builder.Services.AddSignalR();
+builder.Services.AddAutoMapper(cfg => {
+    cfg.AddProfile<RideRequestProfile>();
+});
+
+
 builder.Services.AddScoped<IHubService, HubService>();
 
 builder.Services.AddSingleton<IDriverLocationStoreService, DriverLocationStoreService>();
@@ -102,6 +108,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 builder.Services.AddCors(options =>
 {

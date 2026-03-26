@@ -18,8 +18,9 @@ namespace CarpoolingSystem.API.Controller {
 
         public RideRequestController(
             IRideRequestService rideRequestService,
-            IMapper mapper ,
-            IHubService hubService) {
+            IMapper mapper,
+            IHubService hubService
+        ) {
             _rideRequestService = rideRequestService;
             _mapper = mapper;
             _hubService = hubService;
@@ -30,6 +31,7 @@ namespace CarpoolingSystem.API.Controller {
         public async Task<IActionResult> CreateRequest([FromBody] RideRequestCreateDto dto) {
             try {
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
                 if (string.IsNullOrEmpty(userIdClaim))
                     return Unauthorized("User ID not found in token.");
 
@@ -162,6 +164,7 @@ namespace CarpoolingSystem.API.Controller {
                 {
                     requestId = request.Id,
                     passengerName = request.Passenger?.UserName ?? "Passenger",
+                    passengerId = request.PassengerId,
                     pickup = request.PickupName,
                     destination = request.DestinationName
                 });

@@ -21,39 +21,30 @@ namespace CarpoolingSystem.API.Controller {
             _mapper = mapper;
         }
 
-        [HttpPost("create")]
-        [Authorize(Roles = nameof(UserRole.Passenger))]
-        public async Task<IActionResult> CreateBooking(
-            [FromBody] BookingCreateDto dto) {
-            try {
-                var booking = await _bookingService.CreateBookingAsync(dto);
-                return Ok(_mapper.Map<BookingDto>(booking));
-            }
-            catch (Exception exception) {
-                return BadRequest(exception.Message);
-            }
-        }
+        //[HttpPost("create")]
+        //[Authorize(Roles = nameof(UserRole.Passenger))]
+        //public async Task<IActionResult> CreateBooking(
+        //    [FromBody] BookingCreateDto dto) {
+        //    try {
+        //        var booking = await _bookingService.CreateBookingAsync(dto);
+        //        return Ok(_mapper.Map<BookingDto>(booking));
+        //    }
+        //    catch (Exception exception) {
+        //        return BadRequest(exception.Message);
+        //    }
+        //}
 
-        [HttpPost("accept/{id}")]
+        [HttpPost("accept/{rideRequestId}/{sessionId}")]
         [Authorize(Roles = nameof(UserRole.Driver))]
-        public async Task<IActionResult> AcceptBooking(Guid id) {
-            try {
-                var booking = await _bookingService.AcceptBookingAsync(id);
+        public async Task<IActionResult> AcceptBooking(Guid rideRequestId, Guid sessionId)
+        {
+            try
+            {
+                var booking = await _bookingService.AcceptBookingAsync(rideRequestId, sessionId);
                 return Ok(_mapper.Map<BookingDto>(booking));
             }
-            catch (Exception exception) {
-                return BadRequest(exception.Message);
-            }
-        }
-
-        [HttpPost("reject/{id}")]
-        [Authorize(Roles = nameof(UserRole.Driver))]
-        public async Task<IActionResult> RejectBooking(Guid id) {
-            try {
-                var booking = await _bookingService.RejectBookingAsync(id);
-                return Ok(_mapper.Map<BookingDto>(booking));
-            }
-            catch (Exception exception) {
+            catch (Exception exception)
+            {
                 return BadRequest(exception.Message);
             }
         }
