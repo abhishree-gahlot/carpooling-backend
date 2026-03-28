@@ -7,104 +7,108 @@ using CarpoolingSystem.Domain.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static System.Collections.Specialized.BitVector32;
 
 namespace CarpoolingSystem.Application.Services {
     public class BookingService : IBookingService {
         private readonly IBookingRepository _bookingRepository;
         private readonly IRideSessionRepository _rideSessionRepository;
+        private readonly IRideRequestRepository _rideRequestRepository;
         private readonly IUserRepository _userRepository;
         private const decimal RatePerKm = 9.0m;
 
-        public BookingService(IBookingRepository bookingRepository,IRideSessionRepository rideSessionRepository, IUserRepository userRepository) {
+        public BookingService(
+            IBookingRepository bookingRepository,
+            IRideSessionRepository rideSessionRepository,
+            IUserRepository userRepository,
+            IRideRequestRepository rideRequestRepository
+            ) {
             _bookingRepository = bookingRepository;
             _rideSessionRepository = rideSessionRepository;
-            _userRepository=userRepository;
-        }
-
-        public async Task<Booking> CreateBookingAsync(BookingCreateDto dto) {
-            var session = await _rideSessionRepository.GetByIdAsync(dto.SessionId);
-
-            if (session == null)
-                throw new Exception("Ride session not found.");
-
-            if (!session.IsActive)
-                throw new Exception("This ride session is no longer active.");
-
-            if (session.AvailableSeats <= 0)
-                throw new Exception("No available seats in this session.");
-
-            var existing = await _bookingRepository
-                .GetByRideRequestIdAsync(dto.RideRequestId);
-
-            if (existing != null)
-                throw new Exception("A booking already exists for this ride request.");
-
-            var booking = new Booking {
-                BookingId = Guid.NewGuid(),
-                RideRequestId = dto.RideRequestId,
-                SessionId = dto.SessionId,
-                PIN = string.Empty,
-                Fare=0,
-                Status = BookingStatus.Pending,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _bookingRepository.AddAsync(booking);
-            await _bookingRepository.SaveChangesAsync();
-
-            return await _bookingRepository.GetByIdAsync(booking.BookingId)?? throw new Exception("Failed to retrieve created booking.");
+            _rideRequestRepository = rideRequestRepository;
+            _userRepository =userRepository;
         }
 
         public async Task<Booking> AcceptBookingAsync(Guid rideRequestId, Guid sessionId)
         {
-            var existing = await _bookingRepository.GetByRideRequestIdAsync(rideRequestId);
+            var session = await _rideSessionRepository.GetByIdAsync(sessionId)
+                    ?? throw new Exception("Ride session not found.");
 
-            Booking booking;
-            if (existing == null)
+            if (!session.IsActive)
+            {
+                throw new Exception("This ride session is no longer active.");
+            }
+
+            if (session.AvailableSeats <= 0)
+            {
+                throw new Exception("No available seats in this session.");
+            }
+
+            var rideRequest = await _rideRequestRepository.GetByIdAsync(rideRequestId)
+               ?? throw new Exception("Ride request not found.");
+
+            var passenger = await _userRepository.GetByIdAsync(rideRequest.PassengerId)
+                ?? throw new Exception("Passenger not found.");
+
+            if (string.IsNullOrEmpty(passenger.Pin))
+            {
+                throw new Exception("Passenger has not been assigned a PIN.");
+            }
+
+            double distanceKm = DistanceHelper.CalculateDistanceKm(
+                rideRequest.PickupLatitude,
+                rideRequest.PickupLongitude,
+                rideRequest.DestinationLatitude,
+                rideRequest.DestinationLongitude
+             );
+
+            decimal fare = Math.Round((decimal)distanceKm * RatePerKm, 2);
+
+            var booking = await _bookingRepository.GetBySessionIdAsync(sessionId);
+            
+            if(booking == null)
             {
                 booking = new Booking
                 {
                     BookingId = Guid.NewGuid(),
-                    RideRequestId = rideRequestId,
                     SessionId = sessionId,
-                    PIN = string.Empty,
-                    Fare = 0,
-                    Status = BookingStatus.Pending,
-                    CreatedAt = DateTime.UtcNow
+                    RideRequestIds = new List<Guid>(),
+                    PINs = new List<string>(),
+                    Fares = new List<decimal>(),
+                    Statuses = new List<int>(),
+                    CreatedAts = new List<DateTime>(),
+                    AcceptedAts = new List<DateTime?>(),
+                    BoardedAts = new List<DateTime?>(),
+                    CompletedAts = new List<DateTime?>(),
+                    EndedAts = new List<DateTime?>()
                 };
+
                 await _bookingRepository.AddAsync(booking);
                 await _bookingRepository.SaveChangesAsync();
-                booking = await _bookingRepository.GetByIdAsync(booking.BookingId)
-                    ?? throw new Exception("Failed to retrieve created booking.");
             }
             else
             {
-                booking = existing;
+                if (booking.RideRequestIds.Contains(rideRequestId))
+                {
+                    throw new Exception("This passenger has already been accepted in this session.");
+                }
             }
 
-            if (booking.Status != BookingStatus.Pending)
-                throw new Exception("Only pending bookings can be accepted.");
+            booking.RideRequestIds.Add(rideRequestId);
+            booking.PINs.Add(passenger.Pin);
+            booking.Fares.Add(fare);
+            booking.Statuses.Add((int)BookingStatus.Accepted);
+            booking.CreatedAts.Add(DateTime.UtcNow);
+            booking.AcceptedAts.Add(DateTime.UtcNow);
+            booking.BoardedAts.Add(null);
+            booking.CompletedAts.Add(null);
+            booking.EndedAts.Add(null);
 
-            var passenger = await _userRepository.GetByIdAsync(booking.RideRequest.PassengerId);
+            session.AvailableSeats--;
+            _rideSessionRepository.Update(session);
 
-            if (passenger == null)
-                throw new Exception("Passenger not found.");
-
-            if (string.IsNullOrEmpty(passenger.Pin))
-                throw new Exception("Passenger has not been assigned a PIN");
-
-            double distanceKm = DistanceHelper.CalculateDistanceKm(
-                booking.RideRequest.PickupLatitude,
-                booking.RideRequest.PickupLongitude,
-                booking.RideRequest.DestinationLatitude,
-                booking.RideRequest.DestinationLongitude);
-
-            decimal fare = Math.Round((decimal)distanceKm * RatePerKm, 2);
-
-            booking.PIN = passenger.Pin;
-            booking.Fare = fare;
-            booking.Status = BookingStatus.Accepted;
-            booking.AcceptedAt = DateTime.UtcNow;
+            rideRequest.RideRequestStatus = RideRequestStatus.Accepted;
+            rideRequest.RespondedAt = DateTime.UtcNow;
 
             _bookingRepository.Update(booking);
             await _bookingRepository.SaveChangesAsync();
@@ -112,17 +116,26 @@ namespace CarpoolingSystem.Application.Services {
             return booking;
         }
 
-        public async Task<Booking> RejectBookingAsync(Guid bookingId) {
+        public async Task<Booking> RejectBookingAsync(Guid bookingId, Guid rideRequestId) {
             var booking = await _bookingRepository.GetByIdAsync(bookingId);
 
             if (booking == null)
+            {
                 throw new Exception("Booking not found.");
+            }
 
-            if (booking.Status != BookingStatus.Pending)
+            int index = booking.IndexOf(rideRequestId);
+            if (index == -1)
+            {
+                throw new Exception("Passenger not found in this booking.");
+            }
+
+
+            if (booking.GetStatus(index) != BookingStatus.Pending)
                 throw new Exception("Only pending bookings can be rejected.");
 
-            booking.Status = BookingStatus.Rejected;
-            booking.EndedAt = DateTime.UtcNow;
+            booking.Statuses[index] = (int)BookingStatus.Rejected;
+            booking.EndedAts[index] = DateTime.UtcNow;
 
             _bookingRepository.Update(booking);
             await _bookingRepository.SaveChangesAsync();
@@ -131,28 +144,33 @@ namespace CarpoolingSystem.Application.Services {
         }
 
         public async Task<Booking> VerifyPinAsync(
-            Guid bookingId, BookingVerifyPinDto dto) {
+            Guid bookingId, Guid rideRequestId, BookingVerifyPinDto dto) {
             var booking = await _bookingRepository.GetByIdAsync(bookingId);
 
             if (booking == null)
+            {
                 throw new Exception("Booking not found.");
-
-            if (booking.Status != BookingStatus.Accepted)
-                throw new Exception("Booking must be accepted before PIN verification.");
-
-            if (booking.PIN != dto.PIN)
-                throw new Exception("Invalid PIN. Please check with your driver.");
-
-            booking.Status = BookingStatus.Boarded;
-            booking.BoardedAt = DateTime.UtcNow;
-
-            var session = await _rideSessionRepository
-                .GetByIdAsync(booking.SessionId);
-
-            if (session != null && session.AvailableSeats > 0) {
-                session.AvailableSeats--;
-                _rideSessionRepository.Update(session);
             }
+
+            var index = booking.IndexOf(rideRequestId);
+            if(index == -1)
+            {
+                throw new Exception("Passenger not found in this booking.");
+
+            }
+
+            if (booking.GetStatus(index) != BookingStatus.Accepted)
+            {
+                throw new Exception("Booking must be accepted before PIN verification.");
+            }
+
+            if (booking.PINs[index] != dto.PIN)
+            {
+                throw new Exception("Invalid PIN. Please check with your driver.");
+            }
+
+            booking.Statuses[index] = (int)BookingStatus.Boarded;
+            booking.BoardedAts[index] = DateTime.UtcNow;
 
             _bookingRepository.Update(booking);
             await _bookingRepository.SaveChangesAsync();
@@ -160,18 +178,25 @@ namespace CarpoolingSystem.Application.Services {
             return booking;
         }
 
-        public async Task<Booking> CompleteBookingAsync(Guid bookingId) {
+        public async Task<Booking> CompleteBookingAsync(Guid bookingId, Guid rideRequestId) {
             var booking = await _bookingRepository.GetByIdAsync(bookingId);
 
             if (booking == null)
                 throw new Exception("Booking not found.");
 
-            if (booking.Status != BookingStatus.Boarded)
-                throw new Exception("Only boarded bookings can be completed.");
+            int index = booking.IndexOf(rideRequestId);
+            if (index == -1) { 
+                throw new Exception("Passenger not found in this booking.");
+            }
 
-            booking.Status = BookingStatus.Completed;
-            booking.CompletedAt = DateTime.UtcNow;
-            booking.EndedAt = DateTime.UtcNow;
+            if (booking.GetStatus(index) != BookingStatus.Boarded)
+            {
+                throw new Exception("Only boarded bookings can be completed.");
+            }
+
+            booking.Statuses[index]    = (int)BookingStatus.Completed;
+            booking.CompletedAts[index] = DateTime.UtcNow;
+            booking.EndedAts[index]     = DateTime.UtcNow;
 
             _bookingRepository.Update(booking);
             await _bookingRepository.SaveChangesAsync();
@@ -180,21 +205,43 @@ namespace CarpoolingSystem.Application.Services {
         }
 
         public async Task<Booking> CancelBookingAsync(
-            Guid bookingId, Guid passengerId) {
+            Guid bookingId, Guid rideRequestId, Guid passengerId) {
             var booking = await _bookingRepository.GetByIdAsync(bookingId);
 
             if (booking == null)
+            {
                 throw new Exception("Booking not found.");
+            }
 
-            if (booking.RideRequest.PassengerId != passengerId)
+            int index = booking.IndexOf(rideRequestId);
+            if (index == -1)
+            {
+                throw new Exception("Passenger not found in this booking.");
+            }
+
+            var rideRequest = await _rideRequestRepository.GetByIdAsync(rideRequestId)
+                ?? throw new Exception("Ride request not found.");
+
+            if (rideRequest.PassengerId != passengerId)
+            {
                 throw new Exception("You can only cancel your own bookings.");
+            }
 
-            if (booking.Status == BookingStatus.Boarded ||
-                booking.Status == BookingStatus.Completed)
+            if (booking.GetStatus(index) == BookingStatus.Boarded ||
+                booking.GetStatus(index) == BookingStatus.Completed)
+            {
                 throw new Exception("Cannot cancel a booking that is already boarded or completed.");
+            }
 
-            booking.Status = BookingStatus.Cancelled;
-            booking.EndedAt = DateTime.UtcNow;
+            booking.Statuses[index] = (int)BookingStatus.Cancelled;
+            booking.EndedAts[index] = DateTime.UtcNow;
+
+            var session = await _rideSessionRepository.GetByIdAsync(booking.SessionId);
+            if (session != null)
+            {
+                session.AvailableSeats++;
+                _rideSessionRepository.Update(session);
+            }
 
             _bookingRepository.Update(booking);
             await _bookingRepository.SaveChangesAsync();
@@ -206,18 +253,22 @@ namespace CarpoolingSystem.Application.Services {
             return await _bookingRepository.GetAllAsync();
         }
 
-        public async Task<IEnumerable<Booking>> GetBookingsByPassengerIdAsync(
-            Guid passengerId) {
-            return await _bookingRepository.GetByPassengerIdAsync(passengerId);
+        public async Task<IEnumerable<Booking>> GetBookingsByPassengerIdAsync(Guid passengerId) {
+            var rideRequests = await _rideRequestRepository.GetByPassengerIdAsync(passengerId);
+            var passengerRideRequestIds = new HashSet<Guid>(
+                rideRequests.Select(r => r.Id));
+
+            var allData = await _bookingRepository.GetAllAsync();
+
+            return allData.Where(b =>
+                b.RideRequestIds.Any(id => passengerRideRequestIds.Contains(id)));
         }
 
-        public async Task<IEnumerable<Booking>> GetBookingsByDriverIdAsync(
-            Guid driverId) {
+        public async Task<IEnumerable<Booking>> GetBookingsByDriverIdAsync(Guid driverId) {
             return await _bookingRepository.GetByDriverIdAsync(driverId);
         }
 
-        public async Task<IEnumerable<Booking>> GetBookingsBySessionIdAsync(
-            Guid sessionId) {
+        public async Task<Booking?> GetBookingsBySessionIdAsync(Guid sessionId) {
             return await _bookingRepository.GetBySessionIdAsync(sessionId);
         }
 
@@ -229,7 +280,9 @@ namespace CarpoolingSystem.Application.Services {
             var booking = await _bookingRepository.GetByIdAsync(bookingId);
 
             if (booking == null)
+            {
                 throw new Exception("Booking not found.");
+            }
 
             _bookingRepository.Delete(booking);
             return await _bookingRepository.SaveChangesAsync();
