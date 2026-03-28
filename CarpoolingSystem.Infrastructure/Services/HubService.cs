@@ -15,12 +15,8 @@ public class HubService : IHubService
 
     public async Task NotifyDriverAsync(Guid driverUserId, string eventName, object data)
     {
-        Console.WriteLine($"[ConnectionStore] All keys: {ConnectionStore.GetAllConnections()}");
-        Console.WriteLine($"[ConnectionStore] Looking up: {driverUserId}");
-
         var connectionId = ConnectionStore.GetConnectionId(driverUserId);
-        Console.WriteLine($"[HubService] NotifyDriver | DriverId={driverUserId} ConnectionId={connectionId ?? "NOT FOUND"}");
-
+       
         if (connectionId is not null)
             await _hubContext.Clients
                 .Client(connectionId)
@@ -29,8 +25,6 @@ public class HubService : IHubService
 
     public async Task NotifyPassengerAsync(Guid passengerUserId, string eventName, object data)
     {
-        Console.WriteLine($"[HubService] NotifyPassenger | PassengerId={passengerUserId}");
-
         var connectionId = ConnectionStore.GetConnectionId(passengerUserId);
 
         if (connectionId is not null)

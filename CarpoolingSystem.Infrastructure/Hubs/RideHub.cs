@@ -25,8 +25,6 @@ public class RideHub : Hub
         var rideRequest = await _rideRequestService.GetRequestByIdAsync(dto.RideRequestId);
         var passengerName = rideRequest?.Passenger?.UserName ?? "Passenger";
 
-        Console.WriteLine($"[RideHub] NotifyDriver | DriverId={dto.DriverId} RequestId={dto.RideRequestId}");
-
         await _hubService.NotifyDriverAsync(dto.DriverId, "NewRideRequest", new
         {
             rideRequestId = dto.RideRequestId,
@@ -60,9 +58,6 @@ public class RideHub : Hub
                 await Groups.AddToGroupAsync(Context.ConnectionId, "Drivers");
             else
                 await Groups.AddToGroupAsync(Context.ConnectionId, "Passengers");
-
-            Console.WriteLine($"[RideHub] Connected | UserId={userId} Role={role} ConnId={Context.ConnectionId}");
-            Console.WriteLine($"[RideHub] All connections after add: {ConnectionStore.GetAllConnections()}");
         }
         else
         {
@@ -80,8 +75,6 @@ public class RideHub : Hub
         if (Guid.TryParse(userIdString, out Guid userId))
         {
             ConnectionStore.Remove(userId);
-            Console.WriteLine($"[RideHub] Disconnected | UserId={userId}");
-            Console.WriteLine($"[RideHub] All connections after remove: {ConnectionStore.GetAllConnections()}");
         }
 
         await base.OnDisconnectedAsync(exception);
