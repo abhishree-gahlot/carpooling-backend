@@ -1,4 +1,4 @@
-﻿using CarpoolingSystem.Application.DTOs;
+using CarpoolingSystem.Application.DTOs;
 using CarpoolingSystem.Application.Helper;
 using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Domain.Entities;
@@ -15,18 +15,21 @@ namespace CarpoolingSystem.Application.Services {
         private readonly IRideSessionRepository _rideSessionRepository;
         private readonly IRideRequestRepository _rideRequestRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IHubService _hubService;
+        private readonly IDriverHistoryService _driverHistoryService;
         private const decimal RatePerKm = 9.0m;
 
         public BookingService(
             IBookingRepository bookingRepository,
-            IRideSessionRepository rideSessionRepository,
-            IUserRepository userRepository,
-            IRideRequestRepository rideRequestRepository
-            ) {
+            IRideSessionRepository rideSessionRepository, 
+            IUserRepository userRepository, 
+            IHubService hubService,
+            IDriverHistoryService driverHistoryService) {
             _bookingRepository = bookingRepository;
             _rideSessionRepository = rideSessionRepository;
-            _rideRequestRepository = rideRequestRepository;
-            _userRepository =userRepository;
+            _userRepository = userRepository;
+            _hubService = hubService;
+            _driverHistoryService = driverHistoryService;
         }
 
         public async Task<Booking> AcceptBookingAsync(Guid rideRequestId, Guid sessionId)
@@ -175,6 +178,12 @@ namespace CarpoolingSystem.Application.Services {
             _bookingRepository.Update(booking);
             await _bookingRepository.SaveChangesAsync();
 
+            await _hubService.NotifyPassengerAsync(
+                booking.RideRequest.PassengerId,
+                "PinVerified",
+                new { success = true }
+            );
+
             return booking;
         }
 
@@ -200,6 +209,13 @@ namespace CarpoolingSystem.Application.Services {
 
             _bookingRepository.Update(booking);
             await _bookingRepository.SaveChangesAsync();
+
+            // Aggressive history generation
+            try {
+                await _driverHistoryService.CreateFromSessionAsync(booking.SessionId);
+            } catch (Exception ex) {
+                Console.WriteLine($"[History Worker] Failed to cleanly upsert history: {ex.Message}");
+            }
 
             return booking;
         }

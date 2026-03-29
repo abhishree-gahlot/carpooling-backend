@@ -24,7 +24,7 @@ namespace CarpoolingSystem.Infrastructure.Services
             _jwtIssuer = jwtSection["Issuer"] ?? throw new ArgumentNullException("Jwt: Issuer is missing.");
             _jwtAudience = jwtSection["Audience"] ?? throw new ArgumentNullException("Jwt: Audience is missing.");
             _jwtLifespanMinutes = int.Parse(jwtSection["ExpiryMinutes"] ?? "60");
-        }
+        } 
 
         public string GenerateJwtToken(User user)
         {

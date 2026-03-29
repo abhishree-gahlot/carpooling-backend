@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using CarpoolingSystem.Application.DTOs;
 using CarpoolingSystem.Domain.Entities;
 using System;
@@ -17,7 +17,13 @@ namespace CarpoolingSystem.Application.Mappings {
                     dest => dest.Passengers,
                     opt => opt.MapFrom(src => src.Passengers));
 
-            CreateMap<DriverHistoryPassenger, DriverHistoryPassengerDto>();
+            CreateMap<DriverHistoryPassenger, DriverHistoryPassengerDto>()
+                .ForMember(
+                    dest => dest.Destination,
+                    opt => opt.MapFrom(src => src.RideRequests.DestinationName))
+                .ForMember(
+                    dest => dest.DriverName,
+                    opt => opt.MapFrom(src => src.DriverHistory.Driver.UserName));
         }
     }
 }
