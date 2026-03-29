@@ -1,13 +1,16 @@
-﻿using CarpoolingSystem.Application.DTOs;
+using CarpoolingSystem.Application.DTOs;
 using CarpoolingSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
+using CarpoolingSystem.Domain.Enums;
+
 namespace CarpoolingSystem.API.Controller
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class LocationController : ControllerBase
     {
         private readonly ILocationService _locationService;
@@ -18,6 +21,7 @@ namespace CarpoolingSystem.API.Controller
         }
 
         [HttpGet("nearbyDrivers")]
+        [Authorize(Roles = nameof(UserRole.Passenger))]
         public async Task<IActionResult> GetNearbyDrivers(
             [FromQuery] double latitude,
             [FromQuery] double longitude,
@@ -41,7 +45,7 @@ namespace CarpoolingSystem.API.Controller
         }
 
         [HttpPut("update")]
-        [Authorize]
+        [Authorize(Roles = nameof(UserRole.Driver))]
         public IActionResult UpdateDriverLocation(
             [FromBody] UpdateLocationDto updateLocationDto
         )
