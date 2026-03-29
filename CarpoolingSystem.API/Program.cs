@@ -14,30 +14,42 @@ using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException(
+        "Connection string 'DefaultConnection' is not set. " + "Please set the environment variable: ConnectionStrings__DefaultConnection"
+    );
+}
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRideSessionRepository, RideSessionRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IRideRequestRepository, RideRequestRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IDriverHistoryRepository, DriverHistoryRepository>();
+builder.Services.AddScoped<IDriverHistoryPassengerRepository, DriverHistoryPassengerRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
 builder.Services.AddScoped<IRideSessionService, RideSessionService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
-builder.Services.AddScoped<IRideRequestRepository, RideRequestRepository>();
 builder.Services.AddScoped<IRideRequestService, RideRequestService>();
-
+builder.Services.AddScoped<IDriverHistoryService, DriverHistoryService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
-builder.Services.AddScoped<IHubService, HubService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IDriverHistoryPassengerService, DriverHistoryPassengerService>();
+builder.Services.AddScoped<ICarpoolService, CarpoolService>();
 
 builder.Services.AddSingleton<IDriverLocationStoreService, DriverLocationStoreService>();
-builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
+builder.Services.AddAutoMapper(cfg => { cfg.AddProfile<RideRequestProfile>(); }, typeof(VehicleProfile).Assembly);
 builder.Services.AddSignalR();
-builder.Services.AddAutoMapper(cfg => {
-    cfg.AddProfile<RideRequestProfile>();
-});
 
-
+builder.Services.AddScoped<IHubService, HubService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);

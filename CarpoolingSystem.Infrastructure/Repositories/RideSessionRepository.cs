@@ -31,7 +31,9 @@ public class RideSessionRepository : IRideSessionRepository
         return await _context.RideSessions
             .Include(r => r.Driver)
             .Include(r => r.Vehicle)
-            .FirstOrDefaultAsync(r => r.DriverId == driverId && r.IsActive);
+            .FirstOrDefaultAsync(r => r.DriverId == driverId 
+                                 && r.IsActive 
+                                 && r.AvailableSeats > 0);
     }
 
     public async Task<IEnumerable<RideSession>> GetAllAsync()

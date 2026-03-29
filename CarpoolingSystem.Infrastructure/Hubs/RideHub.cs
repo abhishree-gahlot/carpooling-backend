@@ -35,7 +35,49 @@ public class RideHub : Hub
             pickupName = dto.PickupName,
             pickupLat = dto.PickupLat,
             pickupLng = dto.PickupLng,
-            destinationName = dto.DestinationName
+            destinationName = dto.DestinationName,
+            destinationLat = rideRequest?.DestinationLatitude,  
+            destinationLng = rideRequest?.DestinationLongitude  
+        });
+    }
+
+    public async Task NotifyDriverNewPassengerRequest(NotifyDriverNewPassengerRequestDto dto)
+    {
+        Console.WriteLine($"[RideHub] NotifyDriverNewPassengerRequest | DriverId={dto.DriverId} RequestId={dto.RequestId}");
+
+        await _hubService.NotifyDriverAsync(dto.DriverId, "NewPassengerRequest", new
+        {
+            requestId = dto.RequestId,
+            passengerId = dto.PassengerId,
+            passengerName = dto.PassengerName,
+            pickupName = dto.PickupName,
+            pickupLatitude = dto.PickupLatitude,
+            pickupLongitude = dto.PickupLongitude,
+            destinationName = dto.DestinationName,
+            requestedAt = DateTime.UtcNow
+        });
+    }
+
+    public async Task NotifySeatCountUpdated(NotifySeatCountDto dto)
+    {
+        Console.WriteLine($"[RideHub] NotifySeatCountUpdated | SessionId={dto.SessionId} Available={dto.AvailableSeats}/{dto.TotalSeats}");
+
+        await Clients.Group(dto.SessionId.ToString()).SendAsync("SeatCountUpdated", new
+        {
+            sessionId = dto.SessionId,
+            availableSeats = dto.AvailableSeats,
+            totalSeats = dto.TotalSeats
+        });
+    }
+
+    public async Task NotifyPassengerRequestAccepted(NotifyPassengerRequestAcceptedDto dto)
+    {
+        Console.WriteLine($"[RideHub] NotifyPassengerRequestAccepted | PassengerId={dto.PassengerId} BookingId={dto.BookingId}");
+
+        await _hubService.NotifyPassengerAsync(dto.PassengerId, "RideAccepted", new
+        {
+            bookingId = dto.BookingId,
+            requestId = dto.RequestId
         });
     }
 
@@ -74,6 +116,7 @@ public class RideHub : Hub
         var userIdString = Context.User?
             .FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
+                         
         if (Guid.TryParse(userIdString, out Guid userId))
         {
             ConnectionStore.Remove(userId);
@@ -82,5 +125,16 @@ public class RideHub : Hub
         }
 
         await base.OnDisconnectedAsync(exception);
+    }
+
+    public async Task NotifyPassengerRejected(NotifyPassengerRejectedDto dto)
+    {
+        Console.WriteLine($"[RideHub] NotifyPassengerRejected | PassengerId={dto.PassengerId}");
+
+        await _hubService.NotifyPassengerAsync(dto.PassengerId, "RideRejected", new
+        {
+            rideRequestId = dto.RideRequestId,
+            reason = "Driver accepted another passenger"
+        });
     }
 }

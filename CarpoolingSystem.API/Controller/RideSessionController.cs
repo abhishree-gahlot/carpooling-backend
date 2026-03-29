@@ -38,9 +38,6 @@ namespace CarpoolingSystem.API.Controller {
 
                 return Ok(_mapper.Map<RideSessionDto>(session));
             }
-            //catch (Exception exception) {
-            //    return BadRequest(exception.Message);
-            //}
             catch (Exception exception)
             {
                 return BadRequest(new
