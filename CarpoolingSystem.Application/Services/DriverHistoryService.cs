@@ -13,14 +13,16 @@ namespace CarpoolingSystem.Application.Services {
         private readonly IDriverHistoryPassengerRepository _passengerHistoryRepository;
         private readonly IRideSessionRepository _rideSessionRepository;
         private readonly IBookingRepository _bookingRepository;
+        private readonly IRideRequestRepository _rideRequestRepository;
 
         public DriverHistoryService(
             IDriverHistoryRepository driverHistoryRepository,IDriverHistoryPassengerRepository passengerHistoryRepository,
-            IRideSessionRepository rideSessionRepository,IBookingRepository bookingRepository) {
+            IRideSessionRepository rideSessionRepository,IBookingRepository bookingRepository, IRideRequestRepository rideRequestRepository) {
             _driverHistoryRepository = driverHistoryRepository;
             _passengerHistoryRepository = passengerHistoryRepository;
             _rideSessionRepository = rideSessionRepository;
             _bookingRepository = bookingRepository;
+            _rideRequestRepository = rideRequestRepository;
         }
 
         public async Task<DriverHistory> CreateFromSessionAsync(Guid rideSessionId) {
@@ -35,11 +37,22 @@ namespace CarpoolingSystem.Application.Services {
             if (existing != null)
                 throw new Exception("Driver history already exists for this session.");
 
-            var bookings = (await _bookingRepository.GetBySessionIdAsync(rideSessionId))
-                .Where(b => b.Status == BookingStatus.Completed)
-                .ToList();
+            var booking = await _bookingRepository.GetBySessionIdAsync(rideSessionId);
 
-            decimal totalFare = bookings.Sum(b => b.Fare);
+            decimal totalFare = 0;
+            var completedPassengerIndexes = new List<int>();
+
+            if (booking != null)
+            {
+                for (int i = 0; i < booking.PassengerCount; i++)
+                {
+                    if (booking.GetStatus(i) == BookingStatus.Completed)
+                    {
+                        completedPassengerIndexes.Add(i);
+                        totalFare += booking.Fares[i];
+                    }
+                }
+            }
 
             var driverHistory = new DriverHistory {
                 DriverHistoryId = Guid.NewGuid(),
@@ -55,19 +68,26 @@ namespace CarpoolingSystem.Application.Services {
             await _driverHistoryRepository.AddAsync(driverHistory);
             await _driverHistoryRepository.SaveChangesAsync();
 
-            foreach (var booking in bookings) {
-                var passengerEntry = new DriverHistoryPassenger {
-                    PassengerHistoryId = Guid.NewGuid(),
-                    DriverHistoryId = driverHistory.DriverHistoryId,
-                    RideId = booking.RideRequestId,
-                    PassengerName = booking.RideRequest?.Passenger?.UserName ?? string.Empty,
-                    Pickup = booking.RideRequest?.PickupName ?? string.Empty,
-                    Fare = booking.Fare,
-                    PickupTime = booking.BoardedAt,
-                    Ratings = null
-                };
+            if (booking != null) {
+                foreach (int i in completedPassengerIndexes)
+                {
+                    Guid rideRequestId = booking.RideRequestIds[i];
+                    var rideRequest = await _rideRequestRepository.GetByIdAsync(rideRequestId);
 
-                await _passengerHistoryRepository.AddAsync(passengerEntry);
+                    var passengerEntry = new DriverHistoryPassenger
+                    {
+                        PassengerHistoryId = Guid.NewGuid(),
+                        DriverHistoryId = driverHistory.DriverHistoryId,
+                        RideId = rideRequestId,
+                        PassengerName = rideRequest?.Passenger?.UserName ?? string.Empty,
+                        Pickup = rideRequest?.PickupName ?? string.Empty,
+                        Fare = booking.Fares[i],
+                        PickupTime = booking.BoardedAts[i],
+                        Ratings = null
+                    };
+
+                    await _passengerHistoryRepository.AddAsync(passengerEntry);
+                }
             }
 
             await _passengerHistoryRepository.SaveChangesAsync();

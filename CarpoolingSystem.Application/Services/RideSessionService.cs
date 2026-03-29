@@ -58,6 +58,7 @@ namespace CarpoolingSystem.Application.Services
                 DestinationName = dto.Destination.Name,
                 IsActive = true,
                 StartedAt = DateTime.UtcNow,
+                // BE-3: Initial state
                 Status = RideSessionStatus.Waiting,
                 DriverAvailability = DriverAvailability.Available
             };

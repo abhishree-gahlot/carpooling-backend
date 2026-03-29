@@ -43,7 +43,7 @@ builder.Services.AddScoped<IDriverHistoryService, DriverHistoryService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IDriverHistoryPassengerService, DriverHistoryPassengerService>();
-builder.Services.AddScoped<ICarpoolService, CarpoolService>();
+//builder.Services.AddScoped<ICarpoolService, CarpoolService>();
 
 builder.Services.AddSingleton<IDriverLocationStoreService, DriverLocationStoreService>();
 builder.Services.AddAutoMapper(cfg => { cfg.AddProfile<RideRequestProfile>(); }, typeof(VehicleProfile).Assembly);

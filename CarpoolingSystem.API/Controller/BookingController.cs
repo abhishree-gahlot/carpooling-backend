@@ -36,12 +36,12 @@ namespace CarpoolingSystem.API.Controller {
             }
         }
 
-        [HttpPost("verifypin/{id}")]
+        [HttpPost("verifypin/{bookingId}/{rideRequestId}")]
         [Authorize(Roles = nameof(UserRole.Driver))]
         public async Task<IActionResult> VerifyPin(
-            Guid id, [FromBody] BookingVerifyPinDto dto) {
+            Guid bookingId, Guid rideRequestId, [FromBody] BookingVerifyPinDto dto) {
             try {
-                var booking = await _bookingService.VerifyPinAsync(id, dto);
+                var booking = await _bookingService.VerifyPinAsync(bookingId, rideRequestId, dto);
                 return Ok(_mapper.Map<BookingDto>(booking));
             }
             catch (Exception exception) {
@@ -49,11 +49,11 @@ namespace CarpoolingSystem.API.Controller {
             }
         }
 
-        [HttpPost("complete/{id}")]
+        [HttpPost("complete/{bookingId}/{rideRequestId}")]
         [Authorize(Roles = nameof(UserRole.Driver))]
-        public async Task<IActionResult> CompleteBooking(Guid id) {
+        public async Task<IActionResult> CompleteBooking(Guid bookingId, Guid rideRequestId) {
             try {
-                var booking = await _bookingService.CompleteBookingAsync(id);
+                var booking = await _bookingService.CompleteBookingAsync(bookingId, rideRequestId);
                 return Ok(_mapper.Map<BookingDto>(booking));
             }
             catch (Exception exception) {
@@ -61,9 +61,9 @@ namespace CarpoolingSystem.API.Controller {
             }
         }
 
-        [HttpPost("cancel/{id}")]
+        [HttpPost("cancel/{bookingId}/{rideRequestId}")]
         [Authorize(Roles = nameof(UserRole.Passenger))]
-        public async Task<IActionResult> CancelBooking(Guid id) {
+        public async Task<IActionResult> CancelBooking(Guid bookingId, Guid rideRequestId) {
             try {
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userIdClaim))
@@ -71,13 +71,25 @@ namespace CarpoolingSystem.API.Controller {
 
                 Guid passengerId = Guid.Parse(userIdClaim);
                 var booking = await _bookingService
-                    .CancelBookingAsync(id, passengerId);
+                    .CancelBookingAsync(bookingId, rideRequestId, passengerId);
 
                 return Ok(_mapper.Map<BookingDto>(booking));
             }
             catch (Exception exception) {
                 return BadRequest(exception.Message);
             }
+        }
+
+        [HttpPost("reject/{bookingId}/{rideRequestId}")]
+        [Authorize(Roles = nameof(UserRole.Driver))]
+        public async Task<IActionResult> RejectBooking(Guid bookingId, Guid rideRequestId)
+        {
+            try
+            {
+                var booking = await _bookingService.RejectBookingAsync(bookingId, rideRequestId);
+                return Ok(_mapper.Map<BookingDto>(booking));
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
         [HttpGet("all")]

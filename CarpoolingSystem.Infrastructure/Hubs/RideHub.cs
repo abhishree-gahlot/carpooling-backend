@@ -25,59 +25,18 @@ public class RideHub : Hub
         var rideRequest = await _rideRequestService.GetRequestByIdAsync(dto.RideRequestId);
         var passengerName = rideRequest?.Passenger?.UserName ?? "Passenger";
 
-        Console.WriteLine($"[RideHub] NotifyDriver | DriverId={dto.DriverId} RequestId={dto.RideRequestId}");
-
         await _hubService.NotifyDriverAsync(dto.DriverId, "NewRideRequest", new
         {
             rideRequestId = dto.RideRequestId,
             sessionId = dto.SessionId,
             passengerName = passengerName,
             pickupName = dto.PickupName,
+            passengerId = rideRequest?.PassengerId,
             pickupLat = dto.PickupLat,
             pickupLng = dto.PickupLng,
             destinationName = dto.DestinationName,
-            destinationLat = rideRequest?.DestinationLatitude,  
-            destinationLng = rideRequest?.DestinationLongitude  
-        });
-    }
-
-    public async Task NotifyDriverNewPassengerRequest(NotifyDriverNewPassengerRequestDto dto)
-    {
-        Console.WriteLine($"[RideHub] NotifyDriverNewPassengerRequest | DriverId={dto.DriverId} RequestId={dto.RequestId}");
-
-        await _hubService.NotifyDriverAsync(dto.DriverId, "NewPassengerRequest", new
-        {
-            requestId = dto.RequestId,
-            passengerId = dto.PassengerId,
-            passengerName = dto.PassengerName,
-            pickupName = dto.PickupName,
-            pickupLatitude = dto.PickupLatitude,
-            pickupLongitude = dto.PickupLongitude,
-            destinationName = dto.DestinationName,
-            requestedAt = DateTime.UtcNow
-        });
-    }
-
-    public async Task NotifySeatCountUpdated(NotifySeatCountDto dto)
-    {
-        Console.WriteLine($"[RideHub] NotifySeatCountUpdated | SessionId={dto.SessionId} Available={dto.AvailableSeats}/{dto.TotalSeats}");
-
-        await Clients.Group(dto.SessionId.ToString()).SendAsync("SeatCountUpdated", new
-        {
-            sessionId = dto.SessionId,
-            availableSeats = dto.AvailableSeats,
-            totalSeats = dto.TotalSeats
-        });
-    }
-
-    public async Task NotifyPassengerRequestAccepted(NotifyPassengerRequestAcceptedDto dto)
-    {
-        Console.WriteLine($"[RideHub] NotifyPassengerRequestAccepted | PassengerId={dto.PassengerId} BookingId={dto.BookingId}");
-
-        await _hubService.NotifyPassengerAsync(dto.PassengerId, "RideAccepted", new
-        {
-            bookingId = dto.BookingId,
-            requestId = dto.RequestId
+            destinationLat = rideRequest?.DestinationLatitude,
+            destinationLng = rideRequest?.DestinationLongitude
         });
     }
 
@@ -99,9 +58,6 @@ public class RideHub : Hub
                 await Groups.AddToGroupAsync(Context.ConnectionId, "Drivers");
             else
                 await Groups.AddToGroupAsync(Context.ConnectionId, "Passengers");
-
-            Console.WriteLine($"[RideHub] Connected | UserId={userId} Role={role} ConnId={Context.ConnectionId}");
-            Console.WriteLine($"[RideHub] All connections after add: {ConnectionStore.GetAllConnections()}");
         }
         else
         {
@@ -116,25 +72,56 @@ public class RideHub : Hub
         var userIdString = Context.User?
             .FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
-                         
         if (Guid.TryParse(userIdString, out Guid userId))
         {
             ConnectionStore.Remove(userId);
-            Console.WriteLine($"[RideHub] Disconnected | UserId={userId}");
-            Console.WriteLine($"[RideHub] All connections after remove: {ConnectionStore.GetAllConnections()}");
         }
 
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task NotifyPassengerRejected(NotifyPassengerRejectedDto dto)
+    public async Task ConfirmPayment(PaymentConfirmationDto dto)
     {
-        Console.WriteLine($"[RideHub] NotifyPassengerRejected | PassengerId={dto.PassengerId}");
-
-        await _hubService.NotifyPassengerAsync(dto.PassengerId, "RideRejected", new
+        await _hubService.NotifyPassengerAsync(dto.PassengerId, "PaymentConfirmed", new
         {
-            rideRequestId = dto.RideRequestId,
-            reason = "Driver accepted another passenger"
+            rideRequestId = dto.RideRequestId
+        });
+    }
+
+    public async Task DenyPayment(PaymentConfirmationDto dto)
+    {
+        await _hubService.NotifyPassengerAsync(dto.PassengerId, "PaymentDenied", new
+        {
+            rideRequestId = dto.RideRequestId
+        });
+    }
+
+    public async Task NotifyDriverPassengerPaid(PaymentMadeDto dto)
+    {
+        await _hubService.NotifyDriverAsync(dto.DriverId, "PassengerPaid", new
+        {
+            rideRequestId = dto.RideRequestId
+        });
+    }
+
+    public async Task CancelRequest(CancelRequestDto dto)
+    {
+        await _hubService.NotifyDriverAsync(dto.DriverId, "RequestCancelled", new
+        {
+            rideRequestId = dto.RideRequestId
+        });
+    }
+    public async Task NotifyPassengerPinVerified(NotifyPinVerifiedDto dto)
+    {
+        if (!Guid.TryParse(dto.PassengerId, out Guid passengerId))
+        {
+            Console.WriteLine($"[RideHub] Invalid PassengerId: '{dto.PassengerId}'");
+            return;
+        }
+
+        await _hubService.NotifyPassengerAsync(passengerId, "PinVerified", new
+        {
+            success = dto.Success
         });
     }
 }

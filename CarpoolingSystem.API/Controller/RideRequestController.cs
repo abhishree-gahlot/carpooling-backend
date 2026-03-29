@@ -50,7 +50,7 @@ namespace CarpoolingSystem.API.Controller {
         [HttpPut("update/{id}")]
         [Authorize(Roles = nameof(UserRole.Driver))]
         public async Task<IActionResult> UpdateRequest(
-            Guid id, [FromBody] RideRequestUpdateDto dto) { // riderequestUpdateDto should be updating the ride session table so pass the ride request table model
+            Guid id, [FromBody] RideRequestUpdateDto dto) { 
             try {
                 var request = await _rideRequestService.UpdateRequestAsync(id, dto);
                 return Ok(_mapper.Map<RideRequestDto>(request));

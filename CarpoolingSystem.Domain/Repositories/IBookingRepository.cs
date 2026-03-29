@@ -8,11 +8,12 @@ namespace CarpoolingSystem.Domain.Repositories {
     public interface IBookingRepository {
 
         Task<Booking?> GetByIdAsync(Guid bookingId);
+        Task<Booking?> GetBySessionIdAsync(Guid sessionId);
+        Task<Booking?> GetByRideRequestIdAsync(Guid rideRequestId);
         Task<IEnumerable<Booking>> GetAllAsync();
         Task<IEnumerable<Booking>> GetByPassengerIdAsync(Guid passengerId);
         Task<IEnumerable<Booking>> GetByDriverIdAsync(Guid driverId);
-        Task<IEnumerable<Booking>> GetBySessionIdAsync(Guid sessionId);
-        Task<Booking?> GetByRideRequestIdAsync(Guid rideRequestId);
+        Task<IEnumerable<Booking>> GetAllBySessionIdAsync(Guid sessionId);
         Task<IEnumerable<Booking>> GetByStatusAsync(BookingStatus status);
 
         Task AddAsync(Booking booking);

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CarpoolingSystem.Application.DTOs;
 using CarpoolingSystem.Domain.Entities;
+using CarpoolingSystem.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,10 +19,9 @@ namespace CarpoolingSystem.Application.Mappings {
                     destination => destination.VehicleName,
                     options => options.MapFrom(
                         source => source.RideSession.Vehicle.VehicleName))
-                .ForMember(
-                    destination => destination.PassengerName,
-                    options => options.MapFrom(
-                        source => source.RideRequest.Passenger.UserName));
+                .ForMember(destination => destination.Statuses,
+                    options => options.MapFrom(source => source.Statuses
+                        .Select(st => (BookingStatus)st).ToList()));
         }
     }
 }
