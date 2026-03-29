@@ -1,4 +1,4 @@
-﻿using CarpoolingSystem.Application.DTOs;
+using CarpoolingSystem.Application.DTOs;
 using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Domain.Entities;
 using CarpoolingSystem.Domain.Enums;
@@ -30,12 +30,11 @@ namespace CarpoolingSystem.Application.Services {
             if (session == null)
                 throw new Exception("Ride session not found.");
 
-            if (session.IsActive)
-                throw new Exception("Cannot create history for an active session. End the session first.");
-
             var existing = await _driverHistoryRepository.GetByRideSessionIdAsync(rideSessionId);
-            if (existing != null)
-                throw new Exception("Driver history already exists for this session.");
+            if (existing != null) {
+                _driverHistoryRepository.Delete(existing);
+                await _driverHistoryRepository.SaveChangesAsync();
+            }
 
             var booking = await _bookingRepository.GetBySessionIdAsync(rideSessionId);
 
@@ -61,7 +60,7 @@ namespace CarpoolingSystem.Application.Services {
                 StartingLocation = session.PickupName,
                 DestinationLocation = session.DestinationName,
                 DateAndTime = session.StartedAt,
-                DropOffTime = session.EndedAt,
+                DropOffTime = session.EndedAt ?? DateTime.UtcNow,
                 TotalFare = totalFare
             };
 

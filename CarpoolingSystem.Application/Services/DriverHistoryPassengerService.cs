@@ -1,4 +1,4 @@
-﻿using CarpoolingSystem.Application.DTOs;
+using CarpoolingSystem.Application.DTOs;
 using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Domain.Entities;
 using CarpoolingSystem.Domain.Repositories;
@@ -10,10 +10,13 @@ namespace CarpoolingSystem.Application.Services {
     public class DriverHistoryPassengerService : IDriverHistoryPassengerService{
 
         private readonly IDriverHistoryPassengerRepository _passengerHistoryRepository;
+        private readonly IHubService _hubService;
 
         public DriverHistoryPassengerService(
-            IDriverHistoryPassengerRepository passengerHistoryRepository) {
+            IDriverHistoryPassengerRepository passengerHistoryRepository,
+            IHubService hubService) {
             _passengerHistoryRepository = passengerHistoryRepository;
+            _hubService = hubService;
         }
 
         public async Task<IEnumerable<DriverHistoryPassenger>> GetByPassengerIdAsync(Guid passengerId) {
@@ -38,6 +41,11 @@ namespace CarpoolingSystem.Application.Services {
 
             _passengerHistoryRepository.Update(entry);
             await _passengerHistoryRepository.SaveChangesAsync();
+
+            if (entry.DriverHistory != null)
+            {
+                await _hubService.NotifyDriverAsync(entry.DriverHistory.DriverId, "DriverRated", null);
+            }
 
             return entry;
         }

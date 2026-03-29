@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,5 +12,7 @@ namespace CarpoolingSystem.Application.DTOs {
         public decimal? Fare { get; set; }
         public DateTime? PickupTime { get; set; }
         public decimal? Ratings { get; set; }
+        public string Destination { get; set; } = string.Empty;
+        public string DriverName { get; set; } = string.Empty;
     }
 }

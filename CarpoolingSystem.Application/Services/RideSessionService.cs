@@ -1,4 +1,4 @@
-﻿using CarpoolingSystem.Application.DTOs;
+using CarpoolingSystem.Application.DTOs;
 using CarpoolingSystem.Application.Interfaces;
 using CarpoolingSystem.Domain.Entities;
 using CarpoolingSystem.Domain.Enums;
@@ -11,15 +11,18 @@ namespace CarpoolingSystem.Application.Services
         private readonly IRideSessionRepository _rideSessionRepository;
         private readonly IVehicleRepository _vehicleRepository;
         private readonly IDriverLocationStoreService _driverLocationStore;
+        private readonly IDriverHistoryService _driverHistoryService;
 
         public RideSessionService(
-            IRideSessionRepository rideSessionRepository,
+            IRideSessionRepository rideSessionRepository, 
             IVehicleRepository vehicleRepository,
-            IDriverLocationStoreService driverLocationStore)
-        {
+            IDriverLocationStoreService driverLocationStore,
+            IDriverHistoryService driverHistoryService
+            ) {
             _rideSessionRepository = rideSessionRepository;
             _vehicleRepository = vehicleRepository;
             _driverLocationStore = driverLocationStore;
+            _driverHistoryService = driverHistoryService;
         }
 
         public async Task<RideSession> CreateSessionAsync(RideSessionCreateDto dto, Guid driverId)
@@ -34,6 +37,7 @@ namespace CarpoolingSystem.Application.Services
                 existingSession.DriverAvailability = DriverAvailability.Busy;
                 _rideSessionRepository.Update(existingSession);
                 await _rideSessionRepository.SaveChangesAsync();
+                await _driverHistoryService.CreateFromSessionAsync(existingSession.Id);
             }
 
             var vehicle = await _vehicleRepository.GetByIdAsync(dto.VehicleId);
@@ -114,6 +118,7 @@ namespace CarpoolingSystem.Application.Services
             _rideSessionRepository.Update(session);
             await _rideSessionRepository.SaveChangesAsync();
             _driverLocationStore.TryRemove(driverId);
+            await _driverHistoryService.CreateFromSessionAsync(session.Id);
 
             return session;
         }
