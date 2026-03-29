@@ -23,6 +23,6 @@ namespace CarpoolingSystem.Domain.Entities
         public RideSessionStatus Status { get; set; } = RideSessionStatus.Waiting;
         public DateTime StartedAt { get; set; } = DateTime.UtcNow;
         public DateTime? EndedAt { get; set; }
-
+        public DriverAvailability DriverAvailability { get; set; } = DriverAvailability.Available;
     }
 }
