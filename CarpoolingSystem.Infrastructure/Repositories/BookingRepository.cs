@@ -14,85 +14,57 @@ namespace CarpoolingSystem.Infrastructure.Repositories {
             _context = context;
         }
 
-        public async Task<Booking?> GetByIdAsync(Guid bookingId) {
-            return await _context.Bookings
-                .Include(b => b.RideRequest)
-                    .ThenInclude(r => r.Passenger)
+        private IQueryable<Booking> WithIncludes()
+        {
+            return _context.Bookings
                 .Include(b => b.RideSession)
                     .ThenInclude(s => s.Driver)
                 .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Vehicle)
+                    .ThenInclude(s => s.Vehicle);
+        }
+
+        public async Task<Booking?> GetByIdAsync(Guid bookingId) {
+            return await WithIncludes()
                 .FirstOrDefaultAsync(b => b.BookingId == bookingId);
         }
 
+        public async Task<Booking?> GetBySessionIdAsync(Guid sessionId)
+        {
+            return await WithIncludes()
+                .FirstOrDefaultAsync(b => b.SessionId == sessionId);
+        }
+
+        public async Task<Booking?> GetByRideRequestIdAsync(Guid rideRequestId)
+        {
+            var allData = await WithIncludes().ToListAsync();
+            return allData.FirstOrDefault(b => b.RideRequestIds.Contains(rideRequestId));
+        }
+
         public async Task<IEnumerable<Booking>> GetAllAsync() {
-            return await _context.Bookings
-                .Include(b => b.RideRequest)
-                    .ThenInclude(r => r.Passenger)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Driver)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Vehicle)
-                .ToListAsync();
+            return await WithIncludes().ToListAsync();
         }
 
         public async Task<IEnumerable<Booking>> GetByPassengerIdAsync(Guid passengerId) {
-            return await _context.Bookings
-                .Include(b => b.RideRequest)
-                    .ThenInclude(r => r.Passenger)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Driver)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Vehicle)
-                .Where(b => b.RideRequest.PassengerId == passengerId)
-                .ToListAsync();
+            var allData = await WithIncludes().ToListAsync();
+            return allData.Where(b => b.RideRequestIds.Contains(passengerId));
         }
 
         public async Task<IEnumerable<Booking>> GetByDriverIdAsync(Guid driverId) {
-            return await _context.Bookings
-                .Include(b => b.RideRequest)
-                    .ThenInclude(r => r.Passenger)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Driver)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Vehicle)
+            return await WithIncludes()
                 .Where(b => b.RideSession.DriverId == driverId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Booking>> GetBySessionIdAsync(Guid sessionId) {
-            return await _context.Bookings
-                .Include(b => b.RideRequest)
-                    .ThenInclude(r => r.Passenger)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Driver)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Vehicle)
-                .Where(b => b.SessionId == sessionId)
-                .ToListAsync();
-        }
-
-        public async Task<Booking?> GetByRideRequestIdAsync(Guid rideRequestId) {
-            return await _context.Bookings
-                .Include(b => b.RideRequest)
-                    .ThenInclude(r => r.Passenger)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Driver)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Vehicle)
-                .FirstOrDefaultAsync(b => b.RideRequestId == rideRequestId);
+        public async Task<IEnumerable<Booking>> GetAllBySessionIdAsync(Guid sessionId)
+        {
+            return await WithIncludes()
+                   .Where(b => b.SessionId == sessionId)
+                   .ToListAsync();
         }
 
         public async Task<IEnumerable<Booking>> GetByStatusAsync(BookingStatus status) {
-            return await _context.Bookings
-                .Include(b => b.RideRequest)
-                    .ThenInclude(r => r.Passenger)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Driver)
-                .Include(b => b.RideSession)
-                    .ThenInclude(s => s.Vehicle)
-                .Where(b => b.Status == status)
-                .ToListAsync();
+            var allData = await WithIncludes().ToListAsync();
+            return allData.Where(b => b.Statuses.Contains((int)status));
         }
 
         public async Task AddAsync(Booking booking) {
@@ -110,6 +82,5 @@ namespace CarpoolingSystem.Infrastructure.Repositories {
         public async Task<bool> SaveChangesAsync() {
             return await _context.SaveChangesAsync() > 0;
         }
-
     }
 }

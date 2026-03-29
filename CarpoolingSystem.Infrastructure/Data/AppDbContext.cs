@@ -1,5 +1,7 @@
 using CarpoolingSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Text.Json;
 
 namespace CarpoolingSystem.Infrastructure.Data
 {
@@ -72,24 +74,119 @@ namespace CarpoolingSystem.Infrastructure.Data
             modelBuilder.Entity<Booking>(e =>
             {
                 e.HasKey(b => b.BookingId);
-
                 e.Property(b => b.BookingId)
                  .ValueGeneratedOnAdd();
 
-                e.Property(b => b.PIN)
-                 .HasMaxLength(6);
-                e.Property(b => b.Fare).HasPrecision(10, 2)
-                .HasDefaultValue(0m);
-
-                e.HasOne(b => b.RideRequest)
-                 .WithMany()
-                 .HasForeignKey(b => b.RideRequestId)
-                 .OnDelete(DeleteBehavior.NoAction);
-
                 e.HasOne(b => b.RideSession)
-                 .WithMany()
-                 .HasForeignKey(b => b.SessionId)
-                 .OnDelete(DeleteBehavior.NoAction);
+                .WithMany()
+                .HasForeignKey(b => b.SessionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+                e.Property(b => b.RideRequestIds)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
+                    value => JsonSerializer.Deserialize<List<Guid>>(value, (JsonSerializerOptions?)null) ?? new List<Guid>()
+                )
+                .Metadata.SetValueComparer(new ValueComparer<List<Guid>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (accumulator, value) => HashCode.Combine(accumulator, value.GetHashCode())),
+                    c => c.ToList())
+                );
+
+                e.Property(b => b.PINs)
+                 .HasColumnType("nvarchar(max)")
+                 .HasConversion(
+                    value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
+                    value => JsonSerializer.Deserialize<List<string>>(value, (JsonSerializerOptions?)null) ?? new List<string>()
+                 )
+                 .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (accumulator, v) => HashCode.Combine(accumulator, v.GetHashCode())),
+                    c => c.ToList())
+                 );
+
+                e.Property(b => b.Fares)
+                .HasColumnType("nvarchar(max)")
+                 .HasConversion(
+                    value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
+                    value => JsonSerializer.Deserialize<List<decimal>>(value, (JsonSerializerOptions?)null) ?? new List<decimal>()
+                )
+                 .Metadata.SetValueComparer(new ValueComparer<List<decimal>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (accumulator, value) => HashCode.Combine(accumulator, value.GetHashCode())),
+                    c => c.ToList())
+                 );
+
+                e.Property(b => b.Statuses)
+                .HasColumnType("nvarchar(max)")
+                 .HasConversion(
+                    value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
+                    value => JsonSerializer.Deserialize<List<int>>(value, (JsonSerializerOptions?)null) ?? new List<int>()
+                )
+                 .Metadata.SetValueComparer(new ValueComparer<List<int>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (accumulator, value) => HashCode.Combine(accumulator, value.GetHashCode())),
+                    c => c.ToList())
+                 );
+
+                e.Property(b => b.CreatedAts)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
+                    value => JsonSerializer.Deserialize<List<DateTime>>(value, (JsonSerializerOptions?)null) ?? new List<DateTime>())
+                  .Metadata.SetValueComparer(new ValueComparer<List<DateTime>>(
+                      (c1, c2) => c1!.SequenceEqual(c2!),
+                      c => c.Aggregate(0, (accumulator, value) => HashCode.Combine(accumulator, value.GetHashCode())),
+                      c => c.ToList())
+                  );
+
+                e.Property(b => b.AcceptedAts)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
+                    value => JsonSerializer.Deserialize<List<DateTime?>>(value, (JsonSerializerOptions?)null) ?? new List<DateTime?>())
+                .Metadata.SetValueComparer(new ValueComparer<List<DateTime?>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (accumulator, value) => HashCode.Combine(accumulator, value.GetHashCode())),
+                    c => c.ToList())
+                );  
+
+                e.Property(b => b.BoardedAts)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
+                    value => JsonSerializer.Deserialize<List<DateTime?>>(value, (JsonSerializerOptions?)null) ?? new List<DateTime?>())
+                .Metadata.SetValueComparer(new ValueComparer<List<DateTime?>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (accumulator, value) => HashCode.Combine(accumulator, value.GetHashCode())),
+                    c => c.ToList())
+                );
+
+                e.Property(b => b.CompletedAts)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
+                    value => JsonSerializer.Deserialize<List<DateTime?>>(value, (JsonSerializerOptions?)null) ?? new List<DateTime?>())
+                .Metadata.SetValueComparer(new ValueComparer<List<DateTime?>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (accumulator, value) => HashCode.Combine(accumulator, value.GetHashCode())),
+                    c => c.ToList())
+                );
+
+                e.Property(b => b.EndedAts)
+                 .HasColumnType("nvarchar(max)")
+                 .HasConversion(
+                     value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
+                     value => JsonSerializer.Deserialize<List<DateTime?>>(value, (JsonSerializerOptions?)null) ?? new List<DateTime?>())
+                  .Metadata.SetValueComparer(new ValueComparer<List<DateTime?>>(
+                        (c1, c2) => c1!.SequenceEqual(c2!),
+                        c => c.Aggregate(0, (accumulator, value) => HashCode.Combine(accumulator, value.GetHashCode())),
+                        c => c.ToList())
+                  );
+
+                e.HasIndex(b => b.SessionId)
+                 .HasDatabaseName("IX_Bookings_SessionId");
             });
 
             modelBuilder.Entity<DriverHistory>(e => {
