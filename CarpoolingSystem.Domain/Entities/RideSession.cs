@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using CarpoolingSystem.Domain.Enums;
+using System;
 
-namespace CarpoolingSystem.Domain.Entities {
-    public class RideSession {
+namespace CarpoolingSystem.Domain.Entities
+{
+    public class RideSession
+    {
 
         public Guid Id { get; set; }
         public Guid DriverId { get; set; }
@@ -19,8 +20,9 @@ namespace CarpoolingSystem.Domain.Entities {
         public int TotalSeats { get; set; }
         public int AvailableSeats { get; set; }
         public bool IsActive { get; set; }
-        public DateTime StartedAt { get; set; }= DateTime.UtcNow;
+        public RideSessionStatus Status { get; set; } = RideSessionStatus.Waiting;
+        public DateTime StartedAt { get; set; } = DateTime.UtcNow;
         public DateTime? EndedAt { get; set; }
-
+        public DriverAvailability DriverAvailability { get; set; } = DriverAvailability.Available;
     }
 }

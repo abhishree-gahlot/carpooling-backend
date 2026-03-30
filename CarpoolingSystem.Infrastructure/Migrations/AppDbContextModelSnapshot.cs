@@ -227,6 +227,9 @@ namespace CarpoolingSystem.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<int>("DriverAvailability")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("DriverId")
                         .HasColumnType("uniqueidentifier");
 
@@ -249,6 +252,9 @@ namespace CarpoolingSystem.Infrastructure.Migrations
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<int>("TotalSeats")
                         .HasColumnType("int");

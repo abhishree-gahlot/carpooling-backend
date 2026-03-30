@@ -43,20 +43,13 @@ builder.Services.AddScoped<IDriverHistoryService, DriverHistoryService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IDriverHistoryPassengerService, DriverHistoryPassengerService>();
+//builder.Services.AddScoped<ICarpoolService, CarpoolService>();
 
 builder.Services.AddSingleton<IDriverLocationStoreService, DriverLocationStoreService>();
-builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
+builder.Services.AddAutoMapper(cfg => { cfg.AddProfile<RideRequestProfile>(); }, typeof(VehicleProfile).Assembly);
 builder.Services.AddSignalR();
-builder.Services.AddAutoMapper(cfg => {
-    cfg.AddProfile<RideRequestProfile>();
-});
-
 
 builder.Services.AddScoped<IHubService, HubService>();
-
-builder.Services.AddSingleton<IDriverLocationStoreService, DriverLocationStoreService>();
-builder.Services.AddAutoMapper(cfg => { }, typeof(VehicleProfile).Assembly);
-builder.Services.AddSignalR();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);

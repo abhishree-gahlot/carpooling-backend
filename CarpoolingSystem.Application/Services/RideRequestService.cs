@@ -51,7 +51,7 @@ namespace CarpoolingSystem.Application.Services
         public async Task<RideRequests> UpdateRequestAsync(
             Guid requestId, RideRequestUpdateDto dto)
         {
-            var request = await _rideRequestRepository.GetByIdAsync(requestId);
+            var request = await _rideRequestRepository.GetByIdAsync(requestId); // this fetched row is updating later on the database so dont use notracking here
 
             if (request == null)
                 throw new Exception("Ride request not found.");
@@ -60,6 +60,7 @@ namespace CarpoolingSystem.Application.Services
             {
                 request.RideRequestStatus = dto.RideRequestStatus.Value;
                 request.RespondedAt = DateTime.UtcNow;
+                // update seats here total and avaiable in the request object
             }
 
             _rideRequestRepository.Update(request);

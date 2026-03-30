@@ -6,7 +6,7 @@ namespace CarpoolingSystem.Application.DTOs
 {
     public class NotifyPinVerifiedDto
     {
-        public String PassengerId { get; set; }
+        public required string PassengerId { get; set; }
         public bool Success { get; set; }
     }
 }

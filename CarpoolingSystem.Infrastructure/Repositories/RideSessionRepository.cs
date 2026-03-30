@@ -1,11 +1,8 @@
 ﻿using CarpoolingSystem.Domain.Entities;
+using CarpoolingSystem.Domain.Enums;
 using CarpoolingSystem.Domain.Repositories;
 using CarpoolingSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 
 namespace CarpoolingSystem.Infrastructure.Repositories;
 
@@ -13,9 +10,10 @@ public class RideSessionRepository : IRideSessionRepository
 {
     private readonly AppDbContext _context;
 
-        public RideSessionRepository(AppDbContext context) {
-            _context = context;
-        }
+    public RideSessionRepository(AppDbContext context)
+    {
+        _context = context;
+    }
 
     public async Task<List<Guid>> GetActiveDriverIdsAsync()
     {
@@ -31,7 +29,9 @@ public class RideSessionRepository : IRideSessionRepository
         return await _context.RideSessions
             .Include(r => r.Driver)
             .Include(r => r.Vehicle)
-            .FirstOrDefaultAsync(r => r.DriverId == driverId && r.IsActive);
+            .FirstOrDefaultAsync(r => r.DriverId == driverId
+                                 && r.IsActive
+                                 && r.DriverAvailability == DriverAvailability.Available);
     }
 
     public async Task<IEnumerable<RideSession>> GetAllAsync()
@@ -51,13 +51,18 @@ public class RideSessionRepository : IRideSessionRepository
             .ToListAsync();
     }
 
-        public async Task<RideSession?> GetByIdAsync(Guid rideId) {
-            return await _context.RideSessions.Include(r => r.Driver).Include(r => r.Vehicle).FirstOrDefaultAsync(r => r.Id == rideId);
-        }
+    public async Task<RideSession?> GetByIdAsync(Guid rideId)
+    {
+        return await _context.RideSessions
+            .Include(r => r.Driver)
+            .Include(r => r.Vehicle)
+            .FirstOrDefaultAsync(r => r.Id == rideId);
+    }
 
-        public async Task AddAsync(RideSession rideSession) {
-            await _context.RideSessions.AddAsync(rideSession);
-        }
+    public async Task AddAsync(RideSession rideSession)
+    {
+        await _context.RideSessions.AddAsync(rideSession);
+    }
 
     public void Delete(RideSession rideSession)
     {
