@@ -7,7 +7,7 @@ namespace CarpoolingSystem.Application.Interfaces
 {
     public interface ILocationService
     {
-        Task<IEnumerable<NearbyDriverDto>> GetNearbyDrivers(double latitude, double longitude, double radiusMeters);
+        Task<IEnumerable<NearbyDriverDto>> GetNearbyDrivers(double latitude, double longitude, double destinationLatitude, double destinationLongitude, double radiusMeters);
         void UpdateDriverLocation(Guid driverId, double latitude, double longitude);
     }
 }

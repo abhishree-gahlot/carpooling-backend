@@ -124,4 +124,18 @@ public class RideHub : Hub
             success = dto.Success
         });
     }
+
+    public async Task NotifyPassengerRejected(NotifyPassengerRejectedDto dto)
+    {
+        if (!Guid.TryParse(dto.PassengerId, out Guid passengerId))
+        {
+            Console.WriteLine($"[RideHub] Invalid PassengerId: '{dto.PassengerId}'");
+            return;
+        }
+
+        await _hubService.NotifyPassengerAsync(passengerId, "RideRequestRejected", new
+        {
+            requestId = dto.RideRequestId
+        });
+    }
 }

@@ -21,13 +21,19 @@ namespace CarpoolingSystem.Application.Services
             _driverLocationStore.UpdateLocation(driverId, latitude, longitude);
         }
 
-        public async Task<IEnumerable<NearbyDriverDto>> GetNearbyDrivers(double latitude, double longitude, double radiusMeters)
-        {
+        public async Task<IEnumerable<NearbyDriverDto>> GetNearbyDrivers(
+            double latitude, double longitude,
+            double destinationLatitude,
+            double destinationLongitude,
+            double radiusMeters
+        ) {
             var allDriverLocations = _driverLocationStore.GetAllLocations();
             var radiusKm = radiusMeters / 1000.0;
+            const double destinationToleranceKm = 0.5;
 
             var nearbyDriverLocations = allDriverLocations
-                .Where(driver => DistanceHelper.CalculateDistanceKm(latitude, longitude, driver.Latitude, driver.Longitude) <= radiusKm)
+                .Where(driver => DistanceHelper
+                    .CalculateDistanceKm(latitude, longitude, driver.Latitude, driver.Longitude) <= radiusKm)
                 .ToList();
 
             if(!nearbyDriverLocations.Any())
@@ -48,6 +54,17 @@ namespace CarpoolingSystem.Application.Services
                     continue; 
                 }
 
+                double destinationDistance = DistanceHelper.CalculateDistanceKm(
+                    destinationLatitude, destinationLongitude,
+                    activeSession.DestinationLatitude,
+                    activeSession.DestinationLongitude
+                );
+
+                if (destinationDistance > destinationToleranceKm)
+                {
+                    continue;
+                }
+                    
                 result.Add(new NearbyDriverDto
                 {
                     DriverId = driverLocation.DriverId,
@@ -58,7 +75,9 @@ namespace CarpoolingSystem.Application.Services
                     AvailableSeats = activeSession.AvailableSeats,
                     Latitude = driverLocation.Latitude,
                     Longitude = driverLocation.Longitude,
-                    DistanceKm = Math.Round(DistanceHelper.CalculateDistanceKm(latitude, longitude, driverLocation.Latitude, driverLocation.Longitude), 2),
+                    DistanceKm = Math.Round(DistanceHelper.CalculateDistanceKm(
+                                        latitude, longitude, driverLocation.Latitude, driverLocation.Longitude),
+                                 2),
                     LastUpdated = driverLocation.UpdatedAt
                 });
             }

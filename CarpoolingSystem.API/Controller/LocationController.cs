@@ -21,10 +21,12 @@ namespace CarpoolingSystem.API.Controller
         public async Task<IActionResult> GetNearbyDrivers(
             [FromQuery] double latitude,
             [FromQuery] double longitude,
+            [FromQuery] double destinationLatitude,
+            [FromQuery] double destinationLongitude,
             [FromQuery] double radius = 2000
         )
         {
-            var nearbyDrivers = await _locationService.GetNearbyDrivers(latitude, longitude, radius);
+            var nearbyDrivers = await _locationService.GetNearbyDrivers(latitude, longitude, destinationLatitude, destinationLongitude, radius);
 
             if (!nearbyDrivers.Any())
             {

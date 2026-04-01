@@ -55,18 +55,28 @@ namespace CarpoolingSystem.Application.Services {
                 throw new Exception("Passenger has not been assigned a PIN.");
             }
 
+            var booking = await _bookingRepository.GetBySessionIdAsync(sessionId);
+
+            if (booking != null && booking.RideRequestIds.Contains(rideRequestId))
+            {
+                return booking;
+            }
+
+            if (session.AvailableSeats <= 0)
+            {
+                throw new Exception("No available seats in this session.");
+            }
+
             double distanceKm = DistanceHelper.CalculateDistanceKm(
-                rideRequest.PickupLatitude,
-                rideRequest.PickupLongitude,
-                rideRequest.DestinationLatitude,
-                rideRequest.DestinationLongitude
-             );
+               rideRequest.PickupLatitude,
+               rideRequest.PickupLongitude,
+               rideRequest.DestinationLatitude,
+               rideRequest.DestinationLongitude
+            );
 
             decimal fare = Math.Round((decimal)distanceKm * RatePerKm, 2);
 
-            var booking = await _bookingRepository.GetBySessionIdAsync(sessionId);
-            
-            if(booking == null)
+            if (booking == null)
             {
                 booking = new Booking
                 {
